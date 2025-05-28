@@ -1,6 +1,6 @@
 ## 📝 Summary:
 Hi, I’m Dhruv Gupta, a software engineer and machine learning enthusiast. I enjoy working in the domain of machine learning and data science, where I can blend analytical thinking with creativity. I'm currently pursuing my B.Tech in Computer Science and Engineering (IoT & Intelligent Systems) at Manipal University Jaipur. Originally from Ghaziabad, I’m always excited to learn, collaborate, and contribute to meaningful tech projects.
-Thanks for visiting my GitHub—looking forward to connecting and building something great together!
+Thanks for visiting my GitHub, looking forward to connecting and building something great together!
 
 ## 🌐 Socials:
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/dhruvgpta/) [![email](https://img.shields.io/badge/Email-D14836?logo=gmail&logoColor=white)](mailto:dhruvgupta6580@gmail.com) 
