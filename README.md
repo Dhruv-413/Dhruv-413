@@ -1,12 +1,12 @@
 ## 📝 Summary:
-Hi, I’m Dhruv Gupta, a software engineer and machine learning enthusiast. I enjoy working in the domain of machine learning and data science, where I can blend analytical thinking with creativity. I'm currently pursuing my B.Tech in Computer Science and Engineering (IoT & Intelligent Systems) at Manipal University Jaipur.I’m always excited to learn, collaborate, and contribute to meaningful tech projects.
+Hi, I'm Dhruv Gupta, a software engineer and machine learning enthusiast. I enjoy working in the domain of machine learning and data science, where I can blend analytical thinking with creativity. I'm currently pursuing my B.Tech in Computer Science and Engineering (IoT & Intelligent Systems) at Manipal University Jaipur.I'm always excited to learn, collaborate, and contribute to meaningful tech projects.
 Thanks for visiting my GitHub, looking forward to connecting and building something great together!
 
 <div align="center">
   <a href="https://www.linkedin.com/in/dhruvgpta/" target="_blank">
     <img src="https://img.shields.io/static/v1?message=LinkedIn&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="25" alt="linkedin logo"  />
   </a>
-  <a href="dhruvgupta6580@gmail.com" target="_blank">
+  <a href="mailto:dhruvgupta6580@gmail.com" target="_blank">
     <img src="https://img.shields.io/static/v1?message=Gmail&logo=gmail&label=&color=D14836&logoColor=white&labelColor=&style=for-the-badge" height="25" alt="gmail logo"  />
   </a>
 </div>
