@@ -69,10 +69,6 @@ Thanks for visiting my GitHub, looking forward to connecting and building someth
 </div>
 
 <div align="center">
-  <img src="https://github-profile-trophy.vercel.app?username=Dhruv-413&theme=dracula&column=-1&row=1&margin-w=8&margin-h=8&no-bg=true&no-frame=false&order=4" height="150" alt="trophy graph"  />
-</div>
-
-<div align="center">
   <img src="https://github-readme-activity-graph.vercel.app/graph?username=Dhruv-413&radius=16&theme=dracula&area=true&order=5" height="300" alt="activity-graph graph"  />
 </div>
 
