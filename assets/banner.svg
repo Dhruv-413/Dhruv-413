@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-label="Dhruv Gupta, Full-Stack Developer and AI/ML Engineer">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B1020"/>
+      <stop offset="55%" stop-color="#181A3D"/>
+      <stop offset="100%" stop-color="#2E2A6B"/>
+    </linearGradient>
+
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6366F1" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#A5B4FC" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#6366F1" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+    </radialGradient>
+
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.5" fill="#8B93F8" fill-opacity="0.14"/>
+    </pattern>
+
+    <clipPath id="card">
+      <rect x="0" y="0" width="1200" height="300" rx="18"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="1200" height="300" fill="url(#bg)"/>
+    <rect width="1200" height="300" fill="url(#dots)"/>
+    <ellipse cx="1010" cy="60" rx="320" ry="220" fill="url(#glow)"/>
+
+    <!-- slow drifting accent sweep -->
+    <rect x="-500" y="0" width="500" height="300" fill="url(#sweep)" opacity="0.20">
+      <animate attributeName="x" values="-500;1200" dur="9s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- signal bars, right side -->
+    <g transform="translate(940 108)" fill="#818CF8">
+      <rect x="0"   y="60" width="12" height="40" rx="4" opacity="0.75">
+        <animate attributeName="height" values="40;92;40" dur="3.1s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="60;8;60" dur="3.1s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="26"  y="30" width="12" height="70" rx="4" opacity="0.9">
+        <animate attributeName="height" values="70;26;70" dur="2.4s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="30;74;30" dur="2.4s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="52"  y="70" width="12" height="30" rx="4" opacity="0.6">
+        <animate attributeName="height" values="30;80;30" dur="3.8s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="70;20;70" dur="3.8s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="78"  y="44" width="12" height="56" rx="4" opacity="0.85">
+        <animate attributeName="height" values="56;100;56" dur="2.8s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="44;0;44" dur="2.8s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="104" y="76" width="12" height="24" rx="4" opacity="0.55">
+        <animate attributeName="height" values="24;64;24" dur="4.4s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="76;36;76" dur="4.4s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <!-- text block -->
+    <g font-family="Segoe UI, Helvetica Neue, Helvetica, Arial, sans-serif">
+      <text x="72" y="118" fill="#F8FAFC" font-size="62" font-weight="700" letter-spacing="-1.5">Dhruv Gupta</text>
+      <text x="74" y="164" fill="#A5B4FC" font-size="25" font-weight="500" letter-spacing="0.4">Full-Stack Developer &#183; AI/ML Engineer</text>
+      <text x="74" y="205" fill="#94A3B8" font-size="17" font-weight="400">Semantic search &#183; Computer vision &#183; Enterprise data modernization</text>
+
+      <g transform="translate(74 232)">
+        <circle cx="6" cy="10" r="5" fill="#34D399">
+          <animate attributeName="opacity" values="1;0.25;1" dur="2.2s" repeatCount="indefinite"/>
+        </circle>
+        <text x="22" y="15" fill="#CBD5E1" font-size="15">Ghaziabad, India &#183; IST (UTC+5:30) &#183; open to collaboration</text>
+      </g>
+    </g>
+
+    <!-- baseline accent -->
+    <rect x="0" y="296" width="1200" height="4" fill="#6366F1" opacity="0.85"/>
+  </g>
+</svg>

@@ -1,0 +1,50 @@
+name: Refresh profile README
+
+on:
+  schedule:
+    # 02:15 UTC == 07:45 IST, so the profile is current before the day starts
+    - cron: "15 2 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/build_readme.py"
+      - ".github/workflows/update-readme.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-readme
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build README sections from the GraphQL API
+        env:
+          # GITHUB_TOKEN works for public data. For private contribution
+          # counts, create a PAT with read:user + repo and store it as
+          # a repository secret named GH_PAT.
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_LOGIN: ${{ github.repository_owner }}
+        run: python scripts/build_readme.py
+
+      - name: Commit if anything changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet README.md; then
+            echo "No changes to commit."
+          else
+            git add README.md
+            git commit -m "chore: refresh profile stats"
+            git push
+          fi
