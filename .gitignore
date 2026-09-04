@@ -1,0 +1,6 @@
+.claude
+.serena
+.remember
+\__pycache__
+.playwright*
+*.png
