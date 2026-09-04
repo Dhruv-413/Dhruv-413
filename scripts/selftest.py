@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
-"""Renders every card in every theme from a fixture and checks the output.
+"""Renders every generated block from a fixture and checks the output.
 
-Needs no token and touches no network, so it runs in CI on every push and
-catches the failure this repository is most exposed to: an SVG that is
-subtly malformed and renders as a broken image on the profile page, where
-nobody sees an exception.
+Needs no token and touches no network, so it runs in CI on every push.
+The failure it exists to catch is a block that renders as broken markdown
+on the profile page, where there is no exception for anyone to see: an
+unbalanced code fence swallows the rest of the file, and a table row with
+the wrong column count silently drops a column.
 
     python scripts/selftest.py
 """
 
 import os
 import random
+import re
 import sys
-import xml.dom.minidom
 from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from lib import cards  # noqa: E402
+import build_readme as builder  # noqa: E402
 from lib.github import IST, ProfileData  # noqa: E402
-from lib.theme import THEMES  # noqa: E402
 
 # Values that mean a formatting bug reached the output.
 POISON = ("None", "nan", "NaN", "Infinity", "{", "}")
@@ -32,7 +32,7 @@ def fixture():
     days = []
     for offset in range(364, -1, -1):
         date = today - timedelta(days=offset)
-        # Weekday-heavy, with quiet stretches, so streak logic gets exercised.
+        # Weekday-heavy with quiet stretches, so streak logic gets exercised.
         base = 0 if rng.random() < 0.35 else rng.randint(1, 9)
         if date.weekday() >= 5:
             base = max(0, base - 3)
@@ -41,11 +41,11 @@ def fixture():
     repos = []
     for i, (name, lang) in enumerate(
         [
-            ("alpha", "Python"),
-            ("beta", "TypeScript"),
-            ("gamma", "Jupyter Notebook"),
-            ("delta", "JavaScript"),
-            ("epsilon", "CSS"),
+            ("StockAnalysis", "Python"),
+            ("Dhruv", "TypeScript"),
+            ("Basic-ML-Projects", "Jupyter Notebook"),
+            ("EcoHive", "JavaScript"),
+            ("private-thing", "CSS"),
         ]
     ):
         repos.append(
@@ -54,7 +54,7 @@ def fixture():
                 "description": f"Fixture repository {name}",
                 "url": f"https://github.com/fixture/{name}",
                 "stargazerCount": i,
-                "isPrivate": i % 3 == 0,
+                "isPrivate": name == "private-thing",
                 "pushedAt": "2026-08-01T00:00:00Z",
                 "primaryLanguage": {"name": lang},
                 "languages": {
@@ -90,13 +90,13 @@ def fixture():
     )
 
 
-def edge_cases():
+def empty_account():
     """A brand-new account: every aggregate is empty or zero.
 
-    This is the shape that historically breaks chart code through
-    division by zero or max() on an empty sequence.
+    This is the shape that breaks chart code through division by zero or
+    max() on an empty sequence.
     """
-    empty = ProfileData(
+    return ProfileData(
         login="empty-user",
         created_at=datetime.now(timezone.utc) - timedelta(days=3),
         followers=0,
@@ -114,33 +114,37 @@ def edge_cases():
         commit_samples=0,
         repos=[],
     )
-    return {"empty account": empty}
 
 
-def check(svg):
-    """Assert the SVG is well formed and free of formatting accidents.
-
-    minidom rather than defusedxml on purpose: the input is this
-    process's own output, built moments earlier from escaped values,
-    and it carries no DOCTYPE, so there is no entity to expand. Adding
-    defusedxml would put a pip install in front of every workflow run
-    for a threat this data cannot carry.
-    """
+def check(text):
     problems = []
-    try:
-        xml.dom.minidom.parseString(svg)
-    except Exception as exc:
-        problems.append(f"not well-formed XML: {exc}")
 
-    if "viewBox" not in svg:
-        problems.append("missing viewBox")
-    if not svg.startswith("<svg") or not svg.rstrip().endswith("</svg>"):
-        problems.append("missing svg envelope")
-    if len(svg) < 400:
-        problems.append(f"suspiciously short ({len(svg)} bytes)")
+    if not text or not text.strip():
+        problems.append("empty output")
+
     for token in POISON:
-        if token in svg:
+        if token in text:
             problems.append(f"contains {token!r}")
+
+    # An unbalanced fence swallows the remainder of the README.
+    if text.count("```") % 2:
+        problems.append("unbalanced code fence")
+
+    # Every row of a markdown table needs the same column count, or GitHub
+    # quietly drops cells.
+    rows = [
+        line for line in text.splitlines()
+        if line.startswith("|") and not re.fullmatch(r"[|:\- ]+", line)
+    ]
+    if rows:
+        widths = {line.count("|") for line in rows}
+        if len(widths) > 1:
+            problems.append(f"ragged table columns: {sorted(widths)}")
+
+    # A table needs its delimiter row or it renders as literal pipes.
+    if rows and not any(re.fullmatch(r"[|:\- ]+", line) for line in text.splitlines()):
+        problems.append("table without a delimiter row")
+
     return problems
 
 
@@ -148,38 +152,45 @@ def main():
     failures = 0
     checked = 0
 
-    datasets = {"full year": fixture()}
-    datasets.update(edge_cases())
+    for label, data in (("full year", fixture()), ("empty account", empty_account())):
+        for marker, build in builder.BLOCKS.items():
+            key = f"{marker} [{label}]"
+            try:
+                text = build(data)
+            except Exception as exc:
+                print(f"FAIL {key}: raised {type(exc).__name__}: {exc}")
+                failures += 1
+                continue
+            checked += 1
+            for problem in check(text):
+                print(f"FAIL {key}: {problem}")
+                failures += 1
 
-    for label, data in datasets.items():
-        for theme_name, theme in THEMES.items():
-            for card_name, render in cards.CARDS.items():
-                key = f"{card_name}/{theme_name} [{label}]"
-                try:
-                    svg = render(theme, data)
-                except Exception as exc:
-                    print(f"FAIL {key}: raised {type(exc).__name__}: {exc}")
-                    failures += 1
-                    continue
-                problems = check(svg)
-                checked += 1
-                if problems:
-                    failures += 1
-                    for problem in problems:
-                        print(f"FAIL {key}: {problem}")
+    # The contribution grid must stay rectangular, or the columns shear.
+    grid = builder.build_grid(fixture())
+    body = [
+        line for line in grid.splitlines()
+        if line and not line.startswith("```") and not line.strip().startswith("less")
+    ]
+    lengths = {len(line) for line in body}
+    checked += 1
+    if len(lengths) > 1:
+        print(f"FAIL grid: rows differ in width: {sorted(lengths)}")
+        failures += 1
 
-    # The fallback card must survive too; it is what renders when all else
-    # has already gone wrong.
-    for theme_name, theme in THEMES.items():
-        svg = cards.unavailable(THEMES[theme_name], "token expired")
-        problems = check(svg)
-        checked += 1
-        if problems:
+    # Axis labels must land on the tick they name. This drifted once
+    # already: the final label overhung the row and "23" rendered as "2".
+    axis = builder._ticks(24, {0: "00", 6: "06", 12: "12", 18: "18", 23: "23"})
+    checked += 1
+    for tick, want in (("00", 0), ("06", 6), ("12", 12), ("18", 18), ("23", 23)):
+        if tick not in axis:
+            print(f"FAIL axis: label {tick!r} missing, probably clipped")
             failures += 1
-            for problem in problems:
-                print(f"FAIL unavailable/{theme_name}: {problem}")
+        elif axis.index(tick) != want:
+            print(f"FAIL axis: {tick!r} at {axis.index(tick)}, expected {want}")
+            failures += 1
 
-    print(f"\n{checked} renders checked, {failures} failed")
+    print(f"\n{checked} blocks checked, {failures} failed")
     return 1 if failures else 0
 
 

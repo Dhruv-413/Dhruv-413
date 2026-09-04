@@ -42,7 +42,7 @@ THEMES = {
         "depth_op": "0.045",
         "grain_op": "0.05",
         # Contribution intensity ramp, empty -> busiest.
-        "scale": ["#161A26", "#26306E", "#3D48B4", "#5D67E4", "#949AFF"],
+        "scale": ["#1A1F2E", "#26306E", "#3D48B4", "#5D67E4", "#949AFF"],
         "track": "#171B29",
         # One ramp for every categorical series, so a language chart and
         # a clock face never disagree about what colour means.

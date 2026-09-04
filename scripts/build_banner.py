@@ -17,14 +17,22 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from lib.theme import MONO, SANS, THEMES, esc, grain_filter, open_svg, write  # noqa: E402
+from lib.theme import (
+    MONO,
+    SANS,
+    THEMES,
+    esc,
+    grain_filter,
+    open_svg,
+    write,
+)  # noqa: E402
 
 W, H = 1200, 340
 ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets")
 
 NAME = "Dhruv Gupta"
 EYEBROW = "FULL-STACK ENGINEER / AI SYSTEMS"
-ROLE = "I build retrieval, vision and data systems that stay correct at scale."
+ROLE = "I build retrieval, vision and data systems."
 DETAIL = "Semantic search  ·  Computer vision  ·  Enterprise data modernization"
 STATUS = "Ghaziabad, India  ·  IST (UTC+5:30)  ·  open to collaboration"
 
@@ -32,7 +40,7 @@ STATUS = "Ghaziabad, India  ·  IST (UTC+5:30)  ·  open to collaboration"
 # window onto a bigger space reads better than a specimen in a jar.
 CX, CY = 992, 168
 CLOUD_R = 192
-SEED = 413                 # from the handle, and it keeps the cloud stable
+SEED = 413  # from the handle, and it keeps the cloud stable
 
 
 def point_cloud(count=76, min_gap=21):
@@ -46,7 +54,7 @@ def point_cloud(count=76, min_gap=21):
         radius = CLOUD_R * math.sqrt(rng.random())
         x = CX + radius * math.cos(angle) * 1.18
         y = CY + radius * math.sin(angle) * 0.92
-        if all((x - px) ** 2 + (y - py) ** 2 > min_gap ** 2 for px, py in points):
+        if all((x - px) ** 2 + (y - py) ** 2 > min_gap**2 for px, py in points):
             points.append((x, y))
     return points
 
@@ -156,7 +164,9 @@ def build(t):
     parts.append('<g clip-path="url(#shell)">')
     parts.append(f'<rect width="{W}" height="{H}" rx="22" fill="{t["bg"]}"/>')
     parts.append(f'<rect width="{W}" height="{H}" fill="url(#depth)"/>')
-    parts.append(f'<rect width="{W}" height="{H}" fill="url(#grid)" mask="url(#fade)"/>')
+    parts.append(
+        f'<rect width="{W}" height="{H}" fill="url(#grid)" mask="url(#fade)"/>'
+    )
     parts.append(
         f'<ellipse cx="{CX}" cy="{CY - 40}" rx="380" ry="270" fill="url(#glow)"/>'
     )
