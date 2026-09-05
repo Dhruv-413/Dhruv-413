@@ -47,11 +47,18 @@ jobs:
           GITHUB_USER: Dhruv-413
           OUT_PATH: assets/activity.svg
 
+      - name: Generate header terrain
+        run: python3 scripts/render_header.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
+          GITHUB_USER: Dhruv-413
+          OUT_PATH: assets/header.svg
+
       - name: Commit generated graphics
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git rm --ignore-unmatch -q assets/snake.svg
-          git add assets/languages.svg assets/trophy.svg assets/activity.svg
+          git add assets/languages.svg assets/trophy.svg assets/activity.svg assets/header.svg
           git diff --cached --quiet || git commit -m "chore: refresh profile graphics"
           git push

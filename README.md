@@ -1,13 +1,16 @@
 <div align="center">
-  <img src="assets/header.svg" width="100%" alt="dhruv.ts" />
+  <img src="assets/header.svg" width="100%" alt="Dhruv Gupta — Machine Learning and Full-Stack Engineering" />
 </div>
 
 <p align="center">
-  Studying CSE (IoT &amp; Intelligent Systems) at Manipal University Jaipur — building things, breaking things, and learning from both.<br/>
-  Always open to collaborating on something worth shipping.
+  Building production-ready web and AI/ML systems. Ex-ONGC intern, top 50 of 2000+ at SAP India Hackfest.<br/>
+  Studying CSE (IoT &amp; Intelligent Systems) at Manipal University Jaipur.
 </p>
 
 <div align="center">
+  <a href="https://dhruvgupta-nu.vercel.app" target="_blank">
+    <img src="https://img.shields.io/static/v1?message=Portfolio&logo=vercel&label=&color=000000&logoColor=white&labelColor=&style=for-the-badge" height="25" alt="portfolio"  />
+  </a>
   <a href="https://www.linkedin.com/in/dhruvgpta/" target="_blank">
     <img src="https://img.shields.io/static/v1?message=LinkedIn&logo=linkedin&label=&color=0077B5&logoColor=white&labelColor=&style=for-the-badge" height="25" alt="linkedin logo"  />
   </a>
