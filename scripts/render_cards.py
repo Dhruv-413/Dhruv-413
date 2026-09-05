@@ -18,11 +18,11 @@ TOKEN = os.environ["GITHUB_TOKEN"]
 OUT_DIR = os.environ.get("OUT_DIR", "assets")
 
 BG = "#0d0f17"
-SURFACE = "#141824"
-LINE = "#252a3a"
-INK = "#e6e8f0"
-MUTED = "#8b93b0"
-DIM = "#5a6280"
+SURFACE = "#161b28"
+LINE = "#2f3648"
+INK = "#f4f6fb"
+MUTED = "#aab2d0"
+DIM = "#7f89ad"
 
 CYAN = "#8be9fd"
 GREEN = "#50fa7b"
@@ -244,15 +244,21 @@ def defs(extra=""):
       <line x1="0" y1="0" x2="0" y2="6" stroke="#ffffff" stroke-width="1" stroke-opacity="0.10" />
     </pattern>
     <style>
-      @keyframes draw {{ to {{ stroke-dashoffset: 0; }} }}
-      @keyframes rise {{ from {{ opacity: 0; transform: translateY(8px); }} to {{ opacity: 1; transform: translateY(0); }} }}
-      @keyframes glow {{ 0%, 100% {{ opacity: 0.35; }} 50% {{ opacity: 1; }} }}
+      /* Nothing that carries information may depend on an animation running.
+         An image-embedded SVG restarts its timeline whenever the host page
+         re-rasterises, so opacity is never animated on text -- only
+         transform. Worst case a label is a few pixels off, never invisible. */
+      @keyframes draw {{ from {{ stroke-dashoffset: 1; }} to {{ stroke-dashoffset: 0; }} }}
+      @keyframes rise {{ from {{ transform: translateY(9px); }} to {{ transform: translateY(0); }} }}
+      @keyframes glow {{ 0%, 100% {{ opacity: 0.4; }} 50% {{ opacity: 1; }} }}
       @keyframes wipe {{ from {{ transform: scaleX(0); }} to {{ transform: scaleX(1); }} }}
-      .ln path {{ stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.2s ease-out forwards; }}
-      .pk {{ opacity: 0; animation: glow 3.4s ease-in-out infinite; }}
-      .tx {{ opacity: 0; animation: rise 0.7s cubic-bezier(.2,.7,.3,1) forwards; }}
-      .bar {{ transform-origin: left center; animation: wipe 1s cubic-bezier(.2,.7,.3,1) forwards; }}
-      .arc {{ stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.3s cubic-bezier(.2,.7,.3,1) forwards; }}
+      .ln path {{ stroke-dasharray: 1; animation: draw 2.2s ease-out backwards; }}
+      .pk {{ animation: glow 3.4s ease-in-out infinite; }}
+      .tx {{ animation: rise 0.7s cubic-bezier(.2,.7,.3,1) backwards; }}
+      .bar {{ transform-origin: left center; animation: wipe 1s cubic-bezier(.2,.7,.3,1) backwards; }}
+      @media (prefers-reduced-motion: reduce) {{
+        .ln path, .pk, .tx, .bar {{ animation: none; }}
+      }}
     </style>
     {extra}
   </defs>'''
@@ -261,15 +267,15 @@ def defs(extra=""):
 def frame(w, h, title, right=""):
     """Neat line, title block and source note shared by every panel."""
     note = (
-        f'<text x="{w - 22}" y="30" fill="{DIM}" font-size="11" font-family="{MONO}" '
+        f'<text x="{w - 22}" y="30" fill="{MUTED}" font-size="11.5" font-family="{MONO}" '
         f'text-anchor="end">{right}</text>'
         if right
         else ""
     )
     return f'''<rect width="{w}" height="{h}" rx="14" fill="{SURFACE}" />
   <rect width="{w}" height="{h}" filter="url(#grain)" opacity="0.05" />
-  <text x="22" y="30" fill="{MUTED}" font-size="11.5" font-family="{MONO}"
-        letter-spacing="2.4">{title}</text>{note}
+  <text x="22" y="30" fill="{INK}" font-size="12" font-family="{MONO}"
+        letter-spacing="2.4" opacity="0.92">{title}</text>{note}
   <line x1="22" y1="44" x2="{w - 22}" y2="44" stroke="{LINE}" stroke-width="1" />'''
 
 
@@ -484,7 +490,7 @@ def contour_layers(field, w, h, flip=False, opacity=1.0):
             body += f'<path d="{d}" pathLength="1" style="animation-delay:{0.15 + t * 0.9:.2f}s" />'
         layers.append(
             f'<g class="ln" fill="none" stroke="{tint(t)}" stroke-width="{0.9 + 0.9 * t:.2f}" '
-            f'stroke-opacity="{(0.32 + 0.50 * t) * opacity:.2f}" stroke-linecap="round" '
+            f'stroke-opacity="{(0.42 + 0.52 * t) * opacity:.2f}" stroke-linecap="round" '
             f'stroke-linejoin="round">{body}</g>'
         )
     return "".join(layers)
@@ -494,7 +500,27 @@ def contour_layers(field, w, h, flip=False, opacity=1.0):
 # Cards
 # --------------------------------------------------------------------------- #
 
-HEAD_W, HEAD_H = 1200, 320
+HEAD_W, HEAD_H = 1200, 340
+
+CREDENTIALS = ["B.TECH CSE", "EX&#8209;ONGC", "SAP HACKFEST TOP 50"]
+
+
+def chips(items, x, y, size=10.5):
+    """Small outlined pills; width estimated from monospace advance."""
+    out = ""
+    cx = x
+    for label in items:
+        chars = len(re.sub(r"&#\d+;", "_", label))
+        w = chars * size * 0.62 + 22
+        out += (
+            f'<rect x="{cx:.1f}" y="{y:.1f}" width="{w:.1f}" height="23" rx="11.5" '
+            f'fill="#ffffff" fill-opacity="0.07" stroke="{MUTED}" stroke-opacity="0.35" '
+            f'stroke-width="1" />'
+            f'<text x="{cx + w / 2:.1f}" y="{y + 15.5:.1f}" fill="{MUTED}" font-size="{size}" '
+            f'font-family="{MONO}" letter-spacing="0.8" text-anchor="middle">{label}</text>'
+        )
+        cx += w + 9
+    return out
 
 
 def render_header(user, field):
@@ -543,19 +569,20 @@ def render_header(user, field):
     <rect width="{HEAD_W}" height="{HEAD_H}" fill="url(#halo)" />
     <rect width="{HEAD_W}" height="{HEAD_H}" filter="url(#grain)" opacity="0.05" />
     <g class="tx" style="animation-delay:0.15s">
-      <text x="64" y="128" fill="{INK}" font-size="54" font-weight="700" letter-spacing="2"
+      <text x="64" y="118" fill="{INK}" font-size="54" font-weight="700" letter-spacing="2"
             font-family="{SANS}">Dhruv Gupta</text>
     </g>
     <g class="tx" style="animation-delay:0.30s">
-      <circle cx="72" cy="163" r="4.5" fill="{GREEN}" class="pk" style="animation-delay:0.9s" />
-      <text x="88" y="169" fill="{PINK}" font-size="19" font-weight="600" letter-spacing="1.2"
+      <circle cx="72" cy="152" r="4.5" fill="{GREEN}" class="pk" style="animation-delay:0.9s" />
+      <text x="88" y="158" fill="{PINK}" font-size="19" font-weight="600" letter-spacing="1.2"
             font-family="{SANS}">Software Engineer at Deloitte</text>
     </g>
     <g class="tx" style="animation-delay:0.45s">
-      <text x="66" y="207" fill="{MUTED}" font-size="13.5" font-family="{MONO}">machine learning &#183; full&#8209;stack &#183; distributed systems</text>
+      <text x="66" y="194" fill="{INK}" font-size="14.5" font-family="{MONO}" opacity="0.90">machine learning &#183; full&#8209;stack &#183; distributed systems</text>
     </g>
-    <g class="tx" style="animation-delay:0.60s">
-      <text x="66" y="232" fill="{DIM}" font-size="12" font-family="{MONO}">terrain mapped from {total:,} contributions this year</text>
+    <g class="tx" style="animation-delay:0.60s">{chips(CREDENTIALS, 65, 212)}</g>
+    <g class="tx" style="animation-delay:0.75s">
+      <text x="66" y="270" fill="{MUTED}" font-size="12.5" font-family="{MONO}">terrain mapped from {total:,} contributions this year</text>
     </g>
   </g>
   <rect x="0.75" y="0.75" width="{HEAD_W - 1.5}" height="{HEAD_H - 1.5}" rx="16" fill="none"
@@ -684,6 +711,55 @@ def render_activity(user):
 LANG_W, LANG_H = 592, 300
 
 
+def _worst(row, side):
+    total = sum(row)
+    if total <= 0 or side <= 0:
+        return float("inf")
+    return max(
+        (side * side * max(row)) / (total * total),
+        (total * total) / (side * side * min(row)),
+    )
+
+
+def squarify(values, x, y, w, h):
+    """Squarified treemap: areas must already sum to w*h, sorted descending."""
+    rects = []
+    vals = list(values)
+    while vals:
+        row, rest = [vals[0]], vals[1:]
+        while rest:
+            side = min(w, h)
+            if _worst(row + [rest[0]], side) <= _worst(row, side):
+                row.append(rest.pop(0))
+            else:
+                break
+        total = sum(row)
+        if w >= h:
+            rw = total / h if h else 0
+            ry = y
+            for v in row:
+                rh = v / rw if rw else 0
+                rects.append((x, ry, rw, rh))
+                ry += rh
+            x, w = x + rw, w - rw
+        else:
+            rh = total / w if w else 0
+            rx = x
+            for v in row:
+                rw2 = v / rh if rh else 0
+                rects.append((rx, y, rw2, rh))
+                rx += rw2
+            y, h = y + rh, h - rh
+        vals = rest
+    return rects
+
+
+def readable_on(hex_color):
+    h = hex_color.lstrip("#")
+    r, g, b = (int(h[i : i + 2], 16) for i in (0, 2, 4))
+    return "#0d1119" if (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 else "#ffffff"
+
+
 def render_languages(user):
     # Count repositories per language: byte counts let notebooks swamp everything.
     totals, colors = {}, {}
@@ -693,41 +769,58 @@ def render_languages(user):
             totals[name] = totals.get(name, 0) + 1
             colors[name] = edge["node"]["color"]
 
-    ranked = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)[:6]
-    top = ranked[0][1] if ranked else 1
+    ranked = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)[:7]
+    grand = sum(v for _, v in ranked) or 1
 
-    x_icon, x_name, x_bar = 26, 60, 172
-    bar_w = 320
-    rows = ""
-    y = 82
-    for i, (name, count) in enumerate(ranked):
+    px, py = 26, 62
+    pw, ph = LANG_W - 52, LANG_H - 62 - 26
+    area = pw * ph
+    rects = squarify([v / grand * area for _, v in ranked], px, py, pw, ph)
+
+    tiles = ""
+    for i, ((name, count), (rx, ry, rw, rh)) in enumerate(zip(ranked, rects)):
         col = for_dark(colors.get(name))
-        frac = count / top
-        glyph = icon(LANG_ICON.get(name, ""), x_icon, y - 13, 20) if name in LANG_ICON else ""
-        swatch = (
-            ""
-            if glyph
-            else f'<rect x="{x_icon + 4}" y="{y - 9}" width="12" height="12" rx="3" fill="{col}" />'
-        )
-        rows += (
-            f'<g class="tx" style="animation-delay:{0.06 * i:.2f}s">'
-            f'{plate(x_icon, y - 13, 20)}{glyph}{swatch}'
-            f'<text x="{x_name}" y="{y + 1}" fill="{INK}" font-size="13.5" '
-            f'font-family="{SANS}">{name}</text>'
-            f'<rect x="{x_bar}" y="{y - 7}" width="{bar_w}" height="9" rx="4.5" '
-            f'fill="#ffffff" fill-opacity="0.06" />'
-            f'<rect class="bar" style="animation-delay:{0.06 * i:.2f}s" x="{x_bar}" y="{y - 7}" '
-            f'width="{max(bar_w * frac, 8):.1f}" height="9" rx="4.5" fill="{col}" />'
-            f'<text x="{LANG_W - 26}" y="{y + 1}" fill="{MUTED}" font-size="12.5" '
-            f'font-family="{MONO}" text-anchor="end">{count}</text>'
-            f"</g>"
-        )
-        y += 36
+        gap = 2.0
+        bx, by = rx + gap, ry + gap
+        bw, bh = max(rw - gap * 2, 1), max(rh - gap * 2, 1)
+        fg = readable_on(col)
+        share = count / grand * 100
 
-    body = f'''{frame(LANG_W, LANG_H, "LANGUAGE INDEX &#183; BY REPOSITORY", f"{user['repositories']['totalCount']} repos")}
-  {rows}
+        inner = ""
+        if bw >= 92 and bh >= 62:
+            glyph = icon(LANG_ICON.get(name, ""), bx + 12, by + 12, 22)
+            inner = (
+                f"{glyph}"
+                f'<text x="{bx + 12:.1f}" y="{by + 56:.1f}" fill="{fg}" font-size="13.5" '
+                f'font-weight="600" font-family="{SANS}">{name}</text>'
+                f'<text x="{bx + 12:.1f}" y="{by + 75:.1f}" fill="{fg}" fill-opacity="0.78" '
+                f'font-size="11.5" font-family="{MONO}">{count} repos &#183; {share:.0f}%</text>'
+            )
+        elif bw >= 60 and bh >= 46:
+            glyph = icon(LANG_ICON.get(name, ""), bx + 10, by + 10, 18)
+            inner = (
+                f"{glyph}"
+                f'<text x="{bx + 10:.1f}" y="{by + 46:.1f}" fill="{fg}" font-size="11.5" '
+                f'font-weight="600" font-family="{SANS}">{name}</text>'
+            )
+        elif bw >= 30 and bh >= 30:
+            inner = icon(LANG_ICON.get(name, ""), bx + bw / 2 - 9, by + bh / 2 - 9, 18)
+
+        tiles += (
+            f'<g class="tx" style="animation-delay:{0.07 * i:.2f}s">'
+            f'<rect x="{bx:.1f}" y="{by:.1f}" width="{bw:.1f}" height="{bh:.1f}" rx="7" '
+            f'fill="{col}" fill-opacity="0.92" />'
+            f'<rect x="{bx:.1f}" y="{by:.1f}" width="{bw:.1f}" height="{bh:.1f}" rx="7" '
+            f'fill="url(#hatch)" />'
+            f'<rect x="{bx:.1f}" y="{by:.1f}" width="{bw:.1f}" height="{bh:.1f}" rx="7" '
+            f'fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1" />'
+            f"{inner}</g>"
+        )
+
+    body = f'''{frame(LANG_W, LANG_H, "LAND COVER &#183; LANGUAGES", f"{user['repositories']['totalCount']} repos")}
+  {tiles}
   {outline(LANG_W, LANG_H)}'''
-    return doc(LANG_W, LANG_H, "language index", body)
+    return doc(LANG_W, LANG_H, "language land cover", body)
 
 
 STAT_W, STAT_H = 592, 300
