@@ -2,7 +2,7 @@
 """Refreshes every generated region of the profile README.
 
 Everything below the banner is built as **markdown**, not as images. That
-is a deliberate constraint, and it buys three things an SVG card cannot:
+is a deliberate constraint, and it buys three things an image cannot:
 
   * It is always theme-correct. A `<picture>` with `prefers-color-scheme`
     follows the reader's operating system rather than their GitHub theme,
@@ -11,11 +11,18 @@ is a deliberate constraint, and it buys three things an SVG card cannot:
   * The numbers are selectable, searchable, and readable by screen readers.
   * There is no image to break: no proxy cache, no endpoint, no asset.
 
-The only committed images are assets/banner-dark.svg and
-assets/banner-light.svg, drawn by scripts/build_banner.py.
+Colour without images: a fenced block tagged `yaml` is syntax-highlighted,
+and GitHub paints the key green, the value blue and the trailing comment
+grey, in both themes. So a chart written as `label: ███░░░  # 42%` comes
+out as a green label, a blue bar and a grey annotation. Measured against
+GitHub's own renderer; see the self test.
+
+Frames stay in plain `text` fences. Inside a yaml fence the highlighter
+sweeps the box-drawing characters into the key and value spans, which
+paints the left border green and the right border blue.
 
 Markers written in README.md:
-    <!-- snapshot   -->  headline figures
+    <!-- snapshot   -->  headline figures, framed
     <!-- grid       -->  contribution year, as a character grid
     <!-- trend      -->  weekly sparkline and monthly totals
     <!-- languages  -->  language split
@@ -59,6 +66,10 @@ SPARK = "▁▂▃▄▅▆▇█"
 FULL, EMPTY = "█", "░"
 BAR_WIDTH = 22
 
+# Width of every framed panel. Comfortably inside the ~112 characters the
+# profile column fits, so nothing ever gets a horizontal scrollbar.
+PANEL_W = 66
+
 
 def bar(fraction, width=BAR_WIDTH):
     filled = int(round(fraction * width))
@@ -79,11 +90,9 @@ def spark(values):
 def _ticks(width, labels):
     """Lay labels at exact character positions under a sparkline.
 
-    Hand-spacing these drifts the moment a sparkline changes length, and
-    a misaligned axis is worse than no axis.
+    Grow rather than clip: a label anchored to the final tick needs to
+    overhang, and silently truncating it turns "23" into "2".
     """
-    # Grow rather than clip: a label anchored to the final tick needs to
-    # overhang, and silently truncating it turns "23" into "2".
     span = max([width] + [start + len(text) for start, text in labels.items()])
     row = [" "] * span
     for start, text in sorted(labels.items()):
@@ -91,6 +100,34 @@ def _ticks(width, labels):
             if 0 <= start + offset < span:
                 row[start + offset] = char
     return "".join(row).rstrip()
+
+
+def panel(title, rows):
+    """A box-drawn panel with computed widths.
+
+    Hand-spacing a frame guarantees a ragged right edge the first time a
+    number gains a digit, so every line is padded to PANEL_W here and the
+    self test asserts the result is rectangular.
+    """
+    head = "╭─ " + title + " "
+    out = [head + "─" * (PANEL_W - len(head) - 1) + "╮"]
+    for row in rows:
+        out.append("│ " + row.ljust(PANEL_W - 3) + "│")
+    out.append("╰" + "─" * (PANEL_W - 2) + "╯")
+    return out
+
+
+def pair(label_a, value_a, label_b, value_b, gutter=4):
+    """Two label/value columns, each value right-aligned in its half."""
+    half = (PANEL_W - 4 - gutter) // 2
+    left = label_a.ljust(max(half - len(value_a), 1)) + value_a
+    right = label_b.ljust(max(half - len(value_b), 1)) + value_b
+    return left + " " * gutter + right
+
+
+def fence(tag, lines):
+    """Wrap lines in a fenced block."""
+    return "\n".join(["```" + tag] + list(lines) + ["```"])
 
 
 def level(count, busiest):
@@ -125,38 +162,38 @@ def _weeks(days):
 
 
 def build_snapshot(d):
-    """Headline figures, paired two-up so the block stays compact."""
+    """Headline figures in a framed panel.
+
+    Plain text rather than a yaml fence on purpose: inside yaml the
+    highlighter sweeps the frame characters into the key and value spans,
+    painting the left border green and the right border blue.
+    """
     busiest_date, busiest_count = d.busiest_day
     current, longest = d.current_streak, d.longest_streak
-    left = [
-        ("Contributions, last 12 months", f"{d.total_contributions:,}"),
-        ("Commits authored", f"{d.commits:,}"),
-        ("Pull requests opened", f"{d.pull_requests:,}"),
-        ("Code reviews given", f"{d.reviews:,}"),
+    rows = [
+        pair("contributions", f"{d.total_contributions:,}",
+             "public repositories", f"{d.public_repos}"),
+        pair("commits", f"{d.commits:,}", "stars earned", f"{d.stars}"),
+        pair("pull requests", f"{d.pull_requests:,}",
+             "current streak", f"{current} day{'s' if current != 1 else ''}"),
+        pair("code reviews", f"{d.reviews:,}",
+             "longest streak", f"{longest} days"),
     ]
-    right = [
-        ("Public repositories", f"{d.public_repos}"),
-        ("Stars earned", f"{d.stars}"),
-        ("Current streak", f"{current} day{'s' if current != 1 else ''}"),
-        ("Longest streak", f"{longest} days"),
-    ]
-    out = ["| Activity | | Reach | |", "| :--- | ---: | :--- | ---: |"]
-    for (label_a, value_a), (label_b, value_b) in zip(left, right):
-        out.append(f"| {label_a} | **{value_a}** | {label_b} | **{value_b}** |")
     if busiest_date:
-        out.append(
-            f"| Busiest single day | **{busiest_count}** | that day was | "
-            f"**{busiest_date:%d %b %Y}** |"
+        rows.append("")
+        rows.append(
+            f"busiest day    {busiest_count} contributions on "
+            f"{busiest_date:%d %b %Y}"
         )
-    return "\n".join(out)
+    return fence("text", panel("the last twelve months", rows))
 
 
 def build_grid(d):
     """The contribution year as a character grid.
 
     Seven weekday rows by fifty-three week columns, the same shape as
-    GitHub's own graph, in a fenced block so it lands in a monospace font
-    and the columns line up.
+    GitHub's own graph. Tagged yaml so the highlighter tints the cells
+    blue in both themes; untagged it renders a flat grey.
     """
     if not d.days:
         return "_No contribution data yet._"
@@ -164,7 +201,6 @@ def build_grid(d):
     busiest = max(c for _, c in d.days)
     weeks = _weeks(d.days)
 
-    # Month ruler: each month's abbreviation sits above its first column.
     ruler = [" "] * len(weeks)
     seen = set()
     for col, week in enumerate(weeks):
@@ -180,20 +216,19 @@ def build_grid(d):
             rows.setdefault((date.weekday() + 1) % 7, {})[col] = count
 
     labels = ["   ", "Mon", "   ", "Wed", "   ", "Fri", "   "]
-    lines = ["    " + "".join(ruler)]
+    lines = ["    " + "".join(ruler).rstrip()]
     for row in range(7):
         cells = "".join(
             LEVELS[level(rows.get(row, {}).get(col, 0), busiest)]
             for col in range(len(weeks))
         )
-        lines.append(f"{labels[row]} {cells}")
-
+        lines.append(labels[row] + " " + cells)
     lines.append("")
     lines.append(
-        f"    less {''.join(LEVELS)} more"
-        f"         peak {busiest} contributions in a single day"
+        "    less " + "".join(LEVELS) + " more"
+        + f"      peak {busiest} contributions in one day"
     )
-    return "```text\n" + "\n".join(lines) + "\n```"
+    return fence("yaml", lines)
 
 
 def build_trend(d):
@@ -209,34 +244,42 @@ def build_trend(d):
     peak_month = max((total for _, total in months), default=0) or 1
 
     out = [
-        "```text",
-        f"    {spark(weeks)}",
-        "    " + _ticks(len(weeks), {0: "a year ago", len(weeks) - 9: "this week"}),
-        "```",
+        fence("yaml", [
+            "    " + spark(weeks),
+            "    " + _ticks(len(weeks),
+                            {0: "a year ago", len(weeks) - 9: "this week"}),
+        ]),
         "",
-        # The sparkline carries the shape; the month-by-month numbers
-        # are drill-down, so they go one click away rather than adding
-        # twelve rows to the page.
+        # The sparkline carries the shape; month-by-month is drill-down, so
+        # it goes one click away rather than adding twelve rows to the page.
         "<details>",
         "<summary>Month by month</summary>",
         "",
-        "| Month | Contributions | |",
-        "| :--- | ---: | :--- |",
     ]
+    rows = []
     for (year, month), total in months:
         stamp = datetime(year, month, 1)
-        out.append(f"| {stamp:%b %Y} | {total} | `{bar(total / peak_month, 18)}` |")
+        label = f"{stamp:%b %Y}:"
+        rows.append(label.ljust(10) + bar(total / peak_month, 24) + f"  # {total}")
+    out.append(fence("yaml", rows))
     out += ["", "</details>"]
     return "\n".join(out)
 
 
 def build_languages(d):
+    """Language split as coloured bars.
+
+    The yaml fence gives a green label, a blue bar and a grey annotation
+    in both GitHub themes, which a markdown table cannot.
+    """
     if not d.languages:
         return "_No language data available._"
-    out = ["| Language | Share | |", "| :--- | :--- | ---: |"]
-    for name, share in d.languages:
-        out.append(f"| **{name}** | `{bar(share)}` | {share * 100:.1f}% |")
-    return "\n".join(out)
+    width = max(len(name) for name, _ in d.languages) + 3
+    rows = [
+        (name + ":").ljust(width) + bar(share, 24) + f"  # {share * 100:.1f}%"
+        for name, share in d.languages
+    ]
+    return fence("yaml", rows)
 
 
 def build_rhythm(d):
@@ -245,32 +288,33 @@ def build_rhythm(d):
         return "_No commit timestamps available._"
 
     hours = [d.hours.get(h, 0) for h in range(24)]
-    out = [
-        "```text",
-        f"    {spark(hours)}",
-        "    " + _ticks(24, {0: "00", 6: "06", 12: "12", 18: "18", 23: "23"})
-        + "   IST",
-        "```",
-        "",
-        "| Time of day | Window | Commits | |",
-        "| :--- | :--- | ---: | :--- |",
-    ]
+    width = max(len(name) for name, _, _ in WINDOWS) + 3
+    rows = []
     for label, window, span in WINDOWS:
         count = sum(d.hours.get(hour, 0) for hour in span)
         share = count / d.commit_samples
-        out.append(
-            f"| **{label}** | {window} | {count} | "
-            f"`{bar(share, 18)}` {share * 100:.0f}% |"
+        rows.append(
+            (label + ":").ljust(width) + window + "  " + bar(share, 18)
+            + f"  # {share * 100:.0f}%  ({count} commits)"
         )
 
+    out = [
+        fence("yaml", [
+            "    " + spark(hours),
+            "    " + _ticks(24, {0: "00", 6: "06", 12: "12", 18: "18", 23: "23"})
+            + "   IST",
+        ]),
+        "",
+        fence("yaml", rows),
+        "",
+    ]
     tail = [f"Peak hour **{d.peak_hour:02d}:00**"]
     if d.busiest_weekday:
         tail.append(f"busiest weekday **{d.busiest_weekday}**")
-    out.append("")
     out.append(
-        f"{' · '.join(tail)}. Read from {d.commit_samples:,} commit timestamps "
-        f"converted to IST (UTC+05:30), rather than assumed from a profile "
-        f"setting."
+        " · ".join(tail)
+        + f". Read from {d.commit_samples:,} commit timestamps converted to "
+        f"IST (UTC+05:30), rather than assumed from a profile setting."
     )
     return "\n".join(out)
 
@@ -286,28 +330,14 @@ def build_milestones(d):
         }
     )
     rows = [
-        (
-            "Longest streak",
-            f"{d.longest_streak} days",
-            "consecutive days with a contribution",
-        ),
-        (
-            "Busiest day",
-            f"{busiest_count} contributions",
-            f"{busiest_date:%d %B %Y}" if busiest_date else "no data",
-        ),
-        ("Languages shipped", f"{distinct}", "across public repositories"),
-        (
-            "On GitHub",
-            f"{d.years_on_github:.1f} years",
-            f"{d.total_repos} repositories owned, excluding forks",
-        ),
+        pair("longest streak", f"{d.longest_streak} days",
+             "languages shipped", f"{distinct}"),
+        pair("busiest day", f"{busiest_count}",
+             "repositories", f"{d.total_repos}"),
+        pair("on GitHub", f"{d.years_on_github:.1f} years",
+             "followers", f"{d.followers}"),
     ]
-    out = ["| Milestone | Figure | |", "| :--- | ---: | :--- |"]
-    out += [
-        f"| {label} | **{value}** | <sub>{note}</sub> |" for label, value, note in rows
-    ]
-    return "\n".join(out)
+    return fence("text", panel("earned, not awarded", rows))
 
 
 def _ago(stamp):
@@ -364,7 +394,8 @@ def build_projects(d):
             "<tr>\n"
             f'<td width="32%" valign="top"><b><a href="{repo["url"]}">'
             f'{entry["title"]}</a></b><br/><sub>{entry["tagline"]}<br/>'
-            f'{"  ·  ".join(facts)}</sub></td>\n'
+            + "  ·  ".join(facts)
+            + "</sub></td>\n"
             f'<td valign="top">{entry["body"]}</td>\n'
             "</tr>"
         )
@@ -386,9 +417,9 @@ def build_recent(d):
         language = (repo.get("primaryLanguage") or {}).get("name")
         head = f"[**{repo['name']}**]({repo['url']})"
         if repo.get("description"):
-            head += f" — {repo['description'].strip().rstrip('.')}"
+            head += " — " + repo["description"].strip().rstrip(".")
         tail = [b for b in (language, f"pushed {_ago(repo['pushedAt'])}") if b]
-        lines.append(f"- {head}  <sub>{'  ·  '.join(tail)}</sub>")
+        lines.append("- " + head + "  <sub>" + "  ·  ".join(tail) + "</sub>")
     return "\n".join(lines)
 
 
@@ -410,14 +441,15 @@ BLOCKS = {
 
 def replace(content, marker, block):
     pattern = re.compile(
-        rf"<!--\s*{marker} starts\s*-->.*?<!--\s*{marker} ends\s*-->",
+        r"<!--\s*" + marker + r" starts\s*-->.*?<!--\s*" + marker + r" ends\s*-->",
         re.DOTALL,
     )
     if not pattern.search(content):
         print(f"warning: marker '{marker}' not found, skipping", file=sys.stderr)
         return content
     return pattern.sub(
-        f"<!-- {marker} starts -->\n{block}\n<!-- {marker} ends -->", content
+        "<!-- " + marker + " starts -->\n" + block + "\n<!-- " + marker + " ends -->",
+        content,
     )
 
 

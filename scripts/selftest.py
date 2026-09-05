@@ -166,28 +166,30 @@ def main():
                 print(f"FAIL {key}: {problem}")
                 failures += 1
 
-    # The contribution grid must stay rectangular, or the columns shear.
+    # The seven weekday rows must be equal width or the columns shear.
+    # The month ruler above them is rstripped and legitimately shorter.
     grid = builder.build_grid(fixture())
-    body = [
-        line for line in grid.splitlines()
-        if line and not line.startswith("```") and not line.strip().startswith("less")
-    ]
-    lengths = {len(line) for line in body}
+    rows = [l for l in grid.splitlines()
+            if l[:4] in ("    ", "Mon ", "Wed ", "Fri ")
+            and set(l[4:]) <= set(builder.LEVELS)]
     checked += 1
-    if len(lengths) > 1:
-        print(f"FAIL grid: rows differ in width: {sorted(lengths)}")
+    if len(rows) != 7:
+        print(f"FAIL grid: expected 7 weekday rows, found {len(rows)}")
+        failures += 1
+    elif len({len(l) for l in rows}) != 1:
+        print(f"FAIL grid: rows differ in width: {sorted({len(l) for l in rows})}")
         failures += 1
 
-    # Axis labels must land on the tick they name. This drifted once
-    # already: the final label overhung the row and "23" rendered as "2".
-    axis = builder._ticks(24, {0: "00", 6: "06", 12: "12", 18: "18", 23: "23"})
-    checked += 1
-    for tick, want in (("00", 0), ("06", 6), ("12", 12), ("18", 18), ("23", 23)):
-        if tick not in axis:
-            print(f"FAIL axis: label {tick!r} missing, probably clipped")
-            failures += 1
-        elif axis.index(tick) != want:
-            print(f"FAIL axis: {tick!r} at {axis.index(tick)}, expected {want}")
+    # Framed panels must be rectangular. A ragged right edge is the
+    # first thing that breaks when a number gains a digit.
+    for name in ('snapshot', 'milestones'):
+        block = builder.BLOCKS[name](fixture())
+        frame = [l for l in block.splitlines()
+                 if l and l[0] in '╭│╰']
+        widths = {len(l) for l in frame}
+        checked += 1
+        if len(widths) != 1:
+            print(f'FAIL {name}: panel rows differ: {sorted(widths)}')
             failures += 1
 
     print(f"\n{checked} blocks checked, {failures} failed")

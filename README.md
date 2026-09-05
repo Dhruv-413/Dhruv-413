@@ -65,27 +65,30 @@ That has meant embedding food-service catalogues so search understands intent ra
 Read from the GitHub GraphQL API and written into this file every six hours. Nothing here is typed by hand, and nothing here is an image — so it stays correct in either theme and cannot break.
 
 <!-- snapshot starts -->
-| Activity | | Reach | |
-| :--- | ---: | :--- | ---: |
-| Contributions, last 12 months | **469** | Public repositories | **7** |
-| Commits authored | **149** | Stars earned | **1** |
-| Pull requests opened | **7** | Current streak | **0 days** |
-| Code reviews given | **0** | Longest streak | **14 days** |
-| Busiest single day | **24** | that day was | **25 Oct 2025** |
+```text
+╭─ the last twelve months ───────────────────────────────────────╮
+│ contributions             479    public repositories         7 │
+│ commits                   149    stars earned                1 │
+│ pull requests               7    current streak          1 day │
+│ code reviews                0    longest streak        14 days │
+│                                                                │
+│ busiest day    24 contributions on 25 Oct 2025                 │
+╰────────────────────────────────────────────────────────────────╯
+```
 <!-- snapshot ends -->
 
 <!-- grid starts -->
-```text
-    Sep  Oct Nov  Dec Jan Feb Mar  Apr May  Jun Jul Aug  
+```yaml
+    Sep  Oct Nov  Dec Jan Feb Mar  Apr May  Jun Jul Aug
     ·····░··▓······░░···░·░░░·░░░·····················▒░░
 Mon ·▒··············░···░░░·░·▒░·░··················░█▒·░
     ·░······░░······░····░░·░░▒·░···················█▓▒▒▒
 Wed ··░·····▒··░····▒····░░·░·▓····················░█░▒▒▒
     ·········▒······█····░░·░░░·░····················░░░·
 Fri ················░·░·░░░░··░░░░···················░░▒·
-    ·······█········░··░░··░··░░····················░░▒█·
+    ·······█········░··░░··░··░░····················░░▒█▒
 
-    less ·░▒▓█ more         peak 24 contributions in a single day
+    less ·░▒▓█ more      peak 24 contributions in one day
 ```
 <!-- grid ends -->
 
@@ -97,17 +100,17 @@ Fri ················░·░·░░░░··░░░░···
 I am in India, so a graph drawn in UTC would put my evenings in the wrong place. These are real commit timestamps converted to IST.
 
 <!-- rhythm starts -->
-```text
+```yaml
     ▅▃▄▅█▅▃▄▂▄▆▅▇▇▄▄▃▃▃▄▃▄▆▅
     00    06    12    18   23   IST
 ```
 
-| Time of day | Window | Commits | |
-| :--- | :--- | ---: | :--- |
-| **Early morning** | 05:00 - 09:00 | 18 | `██░░░░░░░░░░░░░░░░` 12% |
-| **Daytime** | 09:00 - 17:00 | 59 | `███████░░░░░░░░░░░` 38% |
-| **Evening** | 17:00 - 22:00 | 23 | `███░░░░░░░░░░░░░░░` 15% |
-| **Late night** | 22:00 - 05:00 | 54 | `██████░░░░░░░░░░░░` 35% |
+```yaml
+Early morning:  05:00 - 09:00  ██░░░░░░░░░░░░░░░░  # 12%  (18 commits)
+Daytime:        09:00 - 17:00  ███████░░░░░░░░░░░  # 38%  (59 commits)
+Evening:        17:00 - 22:00  ███░░░░░░░░░░░░░░░  # 15%  (23 commits)
+Late night:     22:00 - 05:00  ██████░░░░░░░░░░░░  # 35%  (54 commits)
+```
 
 Peak hour **04:00** · busiest weekday **Tuesday**. Read from 154 commit timestamps converted to IST (UTC+05:30), rather than assumed from a profile setting.
 <!-- rhythm ends -->
@@ -115,28 +118,28 @@ Peak hour **04:00** · busiest weekday **Tuesday**. Read from 154 commit timesta
 **The shape of the year**
 
 <!-- trend starts -->
-```text
-    ▁▂▁▁▁▁▁▄▅▂▁▁▁▁▁▁▆▁▁▁▂▂▃▂▂▁▇▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▇▇██▄
+```yaml
+    ▁▂▁▁▁▁▁▄▅▂▁▁▁▁▁▁▆▁▁▁▂▂▃▂▂▁▇▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▇▇██▅
     a year ago                                  this week
 ```
 
 <details>
 <summary>Month by month</summary>
 
-| Month | Contributions | |
-| :--- | ---: | :--- |
-| Oct 2025 | 55 | `█████░░░░░░░░░░░░░` |
-| Nov 2025 | 11 | `█░░░░░░░░░░░░░░░░░` |
-| Dec 2025 | 43 | `████░░░░░░░░░░░░░░` |
-| Jan 2026 | 20 | `██░░░░░░░░░░░░░░░░` |
-| Feb 2026 | 26 | `██░░░░░░░░░░░░░░░░` |
-| Mar 2026 | 71 | `██████░░░░░░░░░░░░` |
-| Apr 2026 | 0 | `░░░░░░░░░░░░░░░░░░` |
-| May 2026 | 0 | `░░░░░░░░░░░░░░░░░░` |
-| Jun 2026 | 0 | `░░░░░░░░░░░░░░░░░░` |
-| Jul 2026 | 1 | `░░░░░░░░░░░░░░░░░░` |
-| Aug 2026 | 216 | `██████████████████` |
-| Sep 2026 | 16 | `█░░░░░░░░░░░░░░░░░` |
+```yaml
+Oct 2025: ██████░░░░░░░░░░░░░░░░░░  # 55
+Nov 2025: █░░░░░░░░░░░░░░░░░░░░░░░  # 11
+Dec 2025: █████░░░░░░░░░░░░░░░░░░░  # 43
+Jan 2026: ██░░░░░░░░░░░░░░░░░░░░░░  # 20
+Feb 2026: ███░░░░░░░░░░░░░░░░░░░░░  # 26
+Mar 2026: ████████░░░░░░░░░░░░░░░░  # 71
+Apr 2026: ░░░░░░░░░░░░░░░░░░░░░░░░  # 0
+May 2026: ░░░░░░░░░░░░░░░░░░░░░░░░  # 0
+Jun 2026: ░░░░░░░░░░░░░░░░░░░░░░░░  # 0
+Jul 2026: ░░░░░░░░░░░░░░░░░░░░░░░░  # 1
+Aug 2026: ████████████████████████  # 216
+Sep 2026: ███░░░░░░░░░░░░░░░░░░░░░  # 26
+```
 
 </details>
 <!-- trend ends -->
@@ -146,25 +149,26 @@ Peak hour **04:00** · busiest weekday **Tuesday**. Read from 154 commit timesta
 Worth a caveat: this counts *bytes*, and a Jupyter notebook stores its own rendered output inside the file. Three notebook repositories carry about 9 MB of embedded plots between them, which is why the top line is what it is. It measures artefacts, not the work.
 
 <!-- languages starts -->
-| Language | Share | |
-| :--- | :--- | ---: |
-| **Jupyter Notebook** | `█████████████████░░░░░` | 77.2% |
-| **TypeScript** | `███░░░░░░░░░░░░░░░░░░░` | 15.5% |
-| **Python** | `█░░░░░░░░░░░░░░░░░░░░░` | 5.1% |
-| **JavaScript** | `░░░░░░░░░░░░░░░░░░░░░░` | 1.4% |
-| **CSS** | `░░░░░░░░░░░░░░░░░░░░░░` | 0.5% |
-| **HTML** | `░░░░░░░░░░░░░░░░░░░░░░` | 0.2% |
+```yaml
+Jupyter Notebook:  ███████████████████░░░░░  # 77.2%
+TypeScript:        ████░░░░░░░░░░░░░░░░░░░░  # 15.5%
+Python:            █░░░░░░░░░░░░░░░░░░░░░░░  # 5.1%
+JavaScript:        ░░░░░░░░░░░░░░░░░░░░░░░░  # 1.4%
+CSS:               ░░░░░░░░░░░░░░░░░░░░░░░░  # 0.5%
+HTML:              ░░░░░░░░░░░░░░░░░░░░░░░░  # 0.2%
+```
 <!-- languages ends -->
 
 **Worth keeping**
 
 <!-- milestones starts -->
-| Milestone | Figure | |
-| :--- | ---: | :--- |
-| Longest streak | **14 days** | <sub>consecutive days with a contribution</sub> |
-| Busiest day | **24 contributions** | <sub>25 October 2025</sub> |
-| Languages shipped | **9** | <sub>across public repositories</sub> |
-| On GitHub | **2.7 years** | <sub>12 repositories owned, excluding forks</sub> |
+```text
+╭─ earned, not awarded ──────────────────────────────────────────╮
+│ longest streak        14 days    languages shipped           9 │
+│ busiest day                24    repositories               12 │
+│ on GitHub           2.7 years    followers                   8 │
+╰────────────────────────────────────────────────────────────────╯
+```
 <!-- milestones ends -->
 
 **Recently pushed**
@@ -222,7 +226,7 @@ Worth a caveat: this counts *bytes*, and a Jupyter notebook stores its own rende
 **Happy to talk through any of it.** &nbsp;·&nbsp; <a href="mailto:dhruvgupta6580@gmail.com">dhruvgupta6580@gmail.com</a>
 
 <sub><!-- updated starts -->
-_Rebuilt from the GitHub GraphQL API on 05 September 2026 at 05:29 IST._
+_Rebuilt from the GitHub GraphQL API on 05 September 2026 at 05:52 IST._
 <!-- updated ends --></sub>
 
 </div>
