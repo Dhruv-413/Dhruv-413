@@ -6,135 +6,63 @@
   <img alt="Dhruv Gupta — full-stack engineer and AI systems developer" src="./assets/banner-light.svg" width="100%">
 </picture>
 
-<br/><br/>
+<p>
+  <a href="https://dhruvgupta-nu.vercel.app"><b>Portfolio</b></a> &nbsp;·&nbsp;
+  <a href="https://www.linkedin.com/in/dhruvgpta/"><b>LinkedIn</b></a> &nbsp;·&nbsp;
+  <a href="mailto:dhruvgupta6580@gmail.com"><b>Email</b></a> &nbsp;·&nbsp;
+  <a href="https://dhruvgupta-nu.vercel.app/Dhruv_resume.pdf"><b>Résumé</b></a>
+</p>
 
-<a href="https://dhruvgupta-nu.vercel.app"><img src="https://img.shields.io/badge/Portfolio-0B0D14?style=for-the-badge&logo=vercel&logoColor=FFFFFF" alt="Portfolio" /></a> <a href="https://www.linkedin.com/in/dhruvgpta/"><img src="https://img.shields.io/badge/LinkedIn-0B0D14?style=for-the-badge&logo=linkedin&logoColor=0A66C2" alt="LinkedIn" /></a> <a href="mailto:dhruvgupta6580@gmail.com"><img src="https://img.shields.io/badge/Email-0B0D14?style=for-the-badge&logo=gmail&logoColor=EA4335" alt="Email" /></a> <a href="https://dhruvgupta-nu.vercel.app/Dhruv_resume.pdf"><img src="https://img.shields.io/badge/R%C3%A9sum%C3%A9-0B0D14?style=for-the-badge&logo=readdotcv&logoColor=7C82F9" alt="Resume" /></a>
+<sub>Data migration at Deloitte · final-year CS at Manipal University Jaipur · Ghaziabad, IST</sub>
 
 </div>
 
-<br/>
+## What I build
 
-## About
+Most of what I build reduces to the same problem in different clothes: a question arrives in a form a database cannot answer, and something has to turn it into a query, a vector, or a frame.
 
-I work on the seam between messy inputs and systems people can trust. Most of what I build reduces to the same problem in different clothes: a question arrives in a form a database cannot answer, and something has to turn it into a query, a vector, or a frame.
+```mermaid
+flowchart LR
+    Q["A question a database<br/>cannot answer"] --> N["Normalise"]
+    N --> E["Embed"]
+    E --> I[("Index<br/>FAISS · pgvector")]
+    I --> S["Hybrid search"]
+    S --> A["An answer that<br/>can be cited"]
+```
 
-That has meant embedding food-service catalogues so a search understands intent rather than keywords, running a ResNet50 gaze estimator fast enough that a webcam feels responsive, and consolidating oil-well maintenance logs at ONGC that had lived in five departments and no single place. The through line is not the framework. It is caring whether the thing is still correct at eight million rows and still fast on the hundredth query.
+That has meant embedding food-service catalogues so search understands intent rather than keywords, running a ResNet50 gaze estimator fast enough that a webcam feels responsive, and consolidating **8M+ oil-well maintenance records** at ONGC that had lived in five departments and no single place. The through line is not the framework — it is whether the thing is still correct at eight million rows and still fast on the hundredth query.
 
-Right now that instinct is pointed at enterprise data migration at Deloitte, where correctness under scale is the entire job rather than a nice-to-have.
+<sub>Shipped with **Python · FastAPI · PyTorch · PostgreSQL + pgvector · FAISS · TypeScript · Next.js · SAP ABAP/HANA · Docker**</sub>
 
 > [!NOTE]
-> **Currently building**
->
-> - A **training and placement portal** for Manipal University Jaipur. Placement season runs on spreadsheets and WhatsApp threads at most colleges. This replaces that with role-based access, eligibility rules that filter applications automatically, and an audit trail for every status change.
-> - **Retrieval infrastructure** — embeddings, hybrid search, and the unglamorous work of grounding model output in data that can actually be cited.
-> - Deepening **SAP ABAP and HANA**, migrating legacy structures without losing history.
-
-<br/>
+> Currently building a training-and-placement portal for MUJ, and deepening SAP data migration at Deloitte. Open to AI/ML and full-stack collaboration.
 
 ## Selected work
-
-The descriptions are mine. Stars, language and last-push date are read from the API on every build, so the metrics cannot drift, and a repository that disappears drops out of this table on its own.
 
 <!-- projects starts -->
 <table>
 <tr>
 <td width="32%" valign="top"><b><a href="https://github.com/Dhruv-413/StockAnalysis">Stock Analysis</a></b><br/><sub>Multi-agent market analysis<br/><code>Python</code>  ·  1 star  ·  updated 1 year ago</sub></td>
-<td valign="top">Answers questions like "why did Tesla drop today" by splitting the work across specialised agents: ticker resolution, price retrieval, news aggregation, historical comparison, then synthesis. The unglamorous half is what makes it usable &mdash; rate limiting, caching, and health checks around two external market APIs that fail in different ways.</td>
+<td valign="top">Answers "why did Tesla drop today" by splitting the work across specialised agents &mdash; ticker resolution, prices, news, history, then synthesis. The half that makes it usable is the rate limiting and caching around two market APIs that fail in different ways.</td>
 </tr>
 <tr>
 <td width="32%" valign="top"><b><a href="https://github.com/Dhruv-413/Eye-Gaze-Tracking-">Eye Gaze Tracking</a></b><br/><sub>Real-time gaze estimation<br/><code>Python</code>  ·  updated 1 year ago</sub></td>
-<td valign="top">End-to-end pipeline from dataset normalisation through training to real-time cursor control off a plain webcam. Several model architectures behind one evaluation harness, because "which backbone is better" is only answerable if you can swap them without rewriting the pipeline.</td>
+<td valign="top">Webcam to cursor control, end to end: dataset normalisation, training, then real-time inference. Several backbones sit behind one evaluation harness, because "which is better" is only answerable if you can swap them without rewriting the pipeline.</td>
 </tr>
 <tr>
 <td width="32%" valign="top"><b><a href="https://github.com/Dhruv-413/Dhruv">Portfolio</a></b><br/><sub>dhruvgupta-nu.vercel.app<br/><code>TypeScript</code>  ·  updated 5 months ago</sub></td>
-<td valign="top">A portfolio that pulls its own GitHub activity at request time rather than listing projects by hand, so it cannot quietly go stale. Dark theme, motion that stays out of the way, and a performance budget it has to keep passing.</td>
+<td valign="top">Reads its own GitHub activity at request time instead of listing projects by hand, so it cannot quietly go stale.</td>
 </tr>
 <tr>
 <td width="32%" valign="top"><b><a href="https://github.com/Dhruv-413/EcoHive">EcoHive</a></b><br/><sub>SAP India Hackfest finalist<br/><code>JavaScript</code>  ·  updated 2 years ago</sub></td>
-<td valign="top">A sustainable credit trading platform: log a verifiable green action, earn a credit, trade it. Built in a team of five under hackathon time pressure, which is where most of the actual lesson was.</td>
+<td valign="top">Log a verifiable green action, earn a credit, trade it. Built by five people under hackathon time pressure, which is where the actual lesson was.</td>
 </tr>
 </table>
 <!-- projects ends -->
 
-<details>
-<summary><b>Recently pushed</b></summary>
-
-<br/>
-
-<!-- recent starts -->
-- [**Dhruv**](https://github.com/Dhruv-413/Dhruv)  <sub>TypeScript  ·  pushed 5 months ago</sub>
-- [**SNA_Dhruv_Gupta_229311248**](https://github.com/Dhruv-413/SNA_Dhruv_Gupta_229311248)  <sub>Java  ·  pushed 9 months ago</sub>
-- [**StockAnalysis**](https://github.com/Dhruv-413/StockAnalysis)  <sub>Python  ·  pushed 1 year ago</sub>
-- [**Eye-Gaze-Tracking-**](https://github.com/Dhruv-413/Eye-Gaze-Tracking-)  <sub>Python  ·  pushed 1 year ago</sub>
-- [**Basic-ML-Projects**](https://github.com/Dhruv-413/Basic-ML-Projects)  <sub>Jupyter Notebook  ·  pushed 2 years ago</sub>
-<!-- recent ends -->
-
-</details>
-
-<br/>
-
-## Experience
-
-```mermaid
-gantt
-    title  From coursework to production systems
-    dateFormat  YYYY-MM
-    axisFormat  %Y
-    tickInterval 1year
-    todayMarker off
-
-    section Education
-    B.Tech CSE, IoT and Intelligent Systems, MUJ   :done, edu, 2022-09, 2026-05
-
-    section Recognition
-    Mettl CodeRush, Round 2                        :milestone, m1, 2024-03, 0d
-    Adobe GenSolve, Round 2                        :milestone, m2, 2024-05, 0d
-    SAP India Hackfest, Top 50 of 2000+            :milestone, m3, 2024-07, 0d
-
-    section Industry
-    ONGC, Summer Intern, SAP ABAP and HANA         :done, ongc, 2025-06, 2025-08
-    Deloitte, Data Migration and Modernization     :active, dl, 2026-01, 2026-12
-```
-
-<table>
-<tr>
-<td width="32%" valign="top"><b>Deloitte</b><br/><sub>Data Migration and Modernization Analyst<br/>2026 to present</sub></td>
-<td valign="top">Moving enterprise data between legacy and modern SAP structures. The interesting constraint is that a migration is judged entirely on what it did <em>not</em> lose, so most of the effort goes into reconciliation and verification rather than transfer.</td>
-</tr>
-<tr>
-<td valign="top"><b>ONGC</b><br/><sub>Summer Intern, Delhi<br/>Jun to Aug 2025</sub></td>
-<td valign="top">Built a centralised SAP ABAP and HANA dashboard for oil well management, replacing manual reporting spread across five departments. Cut reporting time by <b>40%</b> and preprocessed <b>8M+ records</b> with Python, FAISS and PyTorch to make historical logs searchable.</td>
-</tr>
-<tr>
-<td valign="top"><b>SAP India Hackfest</b><br/><sub>National Finalist<br/>Jul 2024</sub></td>
-<td valign="top">Led a team of five to a <b>Top 50 finish from 2000+ entries</b> with EcoHive. Most of the learning was in scoping: deciding what to cut so the remaining thing worked end to end.</td>
-</tr>
-<tr>
-<td valign="top"><b>Manipal University Jaipur</b><br/><sub>B.Tech CSE, IoT and Intelligent Systems<br/>2022 to 2026, CGPA 8.06</sub></td>
-<td valign="top">Data structures, DBMS, operating systems and machine learning, plus the placement portal above, which taught more about requirements than any course did.</td>
-</tr>
-</table>
-
-<br/>
-
-## Toolkit
-
-Grouped by where I have actually shipped it, not by what I have read about.
-
-| Domain | Tools | Shipped in |
-| :--- | :--- | :--- |
-| **Backend** | Python, FastAPI, Node.js, Go | Semantic search API, multi-agent NLP service |
-| **Data** | PostgreSQL, pgvector, Redis, FAISS | Vector retrieval at sub-100ms, 8M+ record preprocessing |
-| **AI / ML** | PyTorch, TensorFlow, OpenCV, MediaPipe, scikit-learn | Real-time gaze estimation at 30 FPS, transformer embeddings |
-| **Frontend** | React, Next.js, TypeScript, Tailwind | Placement portal, EcoHive, portfolio |
-| **Enterprise** | SAP ABAP, HANA DB | ONGC well-management dashboard, Deloitte migrations |
-| **Platform** | Docker, Git, GitHub Actions, Vercel | Containerised services, CI for every repo above |
-
-<br/>
-
 ## The year, measured
 
-Every figure below is read from the GitHub GraphQL API and written into this file by a scheduled workflow. Nothing here is typed by hand, and nothing here is an image — which means it stays correct in either GitHub theme, stays selectable, and cannot break.
+Read from the GitHub GraphQL API and written into this file every six hours. Nothing here is typed by hand, and nothing here is an image — so it stays correct in either theme and cannot break.
 
 <!-- snapshot starts -->
 | Activity | | Reach | |
@@ -145,8 +73,6 @@ Every figure below is read from the GitHub GraphQL API and written into this fil
 | Code reviews given | **0** | Longest streak | **14 days** |
 | Busiest single day | **24** | that day was | **25 Oct 2025** |
 <!-- snapshot ends -->
-
-### Contribution graph
 
 <!-- grid starts -->
 ```text
@@ -163,7 +89,30 @@ Fri ················░·░·░░░░··░░░░···
 ```
 <!-- grid ends -->
 
-### The shape of the year
+<details>
+<summary><b>When I commit, what I write, and the shape of the year</b></summary>
+
+<br/>
+
+I am in India, so a graph drawn in UTC would put my evenings in the wrong place. These are real commit timestamps converted to IST.
+
+<!-- rhythm starts -->
+```text
+    ▅▃▄▅█▅▃▄▂▄▆▅▇▇▄▄▃▃▃▄▃▄▆▅
+    00    06    12    18   23   IST
+```
+
+| Time of day | Window | Commits | |
+| :--- | :--- | ---: | :--- |
+| **Early morning** | 05:00 - 09:00 | 18 | `██░░░░░░░░░░░░░░░░` 12% |
+| **Daytime** | 09:00 - 17:00 | 59 | `███████░░░░░░░░░░░` 38% |
+| **Evening** | 17:00 - 22:00 | 23 | `███░░░░░░░░░░░░░░░` 15% |
+| **Late night** | 22:00 - 05:00 | 54 | `██████░░░░░░░░░░░░` 35% |
+
+Peak hour **04:00** · busiest weekday **Tuesday**. Read from 154 commit timestamps converted to IST (UTC+05:30), rather than assumed from a profile setting.
+<!-- rhythm ends -->
+
+**The shape of the year**
 
 <!-- trend starts -->
 ```text
@@ -192,27 +141,9 @@ Fri ················░·░·░░░░··░░░░···
 </details>
 <!-- trend ends -->
 
-### When I actually commit
+**Language footprint**
 
-I am in India, so a graph drawn in UTC would put my evenings in the wrong place. These are real commit timestamps converted to IST.
-
-<!-- rhythm starts -->
-```text
-    ▅▃▄▅█▅▃▄▂▄▆▅▇▇▄▄▃▃▃▄▃▄▆▅
-    00    06    12    18   23   IST
-```
-
-| Time of day | Window | Commits | |
-| :--- | :--- | ---: | :--- |
-| **Early morning** | 05:00 - 09:00 | 18 | `██░░░░░░░░░░░░░░░░` 12% |
-| **Daytime** | 09:00 - 17:00 | 59 | `███████░░░░░░░░░░░` 38% |
-| **Evening** | 17:00 - 22:00 | 23 | `███░░░░░░░░░░░░░░░` 15% |
-| **Late night** | 22:00 - 05:00 | 54 | `██████░░░░░░░░░░░░` 35% |
-
-Peak hour **04:00** · busiest weekday **Tuesday**. Read from 154 commit timestamps converted to IST (UTC+05:30), rather than assumed from a profile setting.
-<!-- rhythm ends -->
-
-### Where the code goes
+Worth a caveat: this counts *bytes*, and a Jupyter notebook stores its own rendered output inside the file. Three notebook repositories carry about 9 MB of embedded plots between them, which is why the top line is what it is. It measures artefacts, not the work.
 
 <!-- languages starts -->
 | Language | Share | |
@@ -225,9 +156,7 @@ Peak hour **04:00** · busiest weekday **Tuesday**. Read from 154 commit timesta
 | **HTML** | `░░░░░░░░░░░░░░░░░░░░░░` | 0.2% |
 <!-- languages ends -->
 
-### Worth keeping
-
-Not a trophy wall. Every line is computed from this account's own history.
+**Worth keeping**
 
 <!-- milestones starts -->
 | Milestone | Figure | |
@@ -238,26 +167,43 @@ Not a trophy wall. Every line is computed from this account's own history.
 | On GitHub | **2.7 years** | <sub>12 repositories owned, excluding forks</sub> |
 <!-- milestones ends -->
 
-<br/>
+**Recently pushed**
 
-## Certifications
+<!-- recent starts -->
+- [**Dhruv**](https://github.com/Dhruv-413/Dhruv)  <sub>TypeScript  ·  pushed 5 months ago</sub>
+- [**SNA_Dhruv_Gupta_229311248**](https://github.com/Dhruv-413/SNA_Dhruv_Gupta_229311248)  <sub>Java  ·  pushed 9 months ago</sub>
+- [**StockAnalysis**](https://github.com/Dhruv-413/StockAnalysis)  <sub>Python  ·  pushed 1 year ago</sub>
+- [**Eye-Gaze-Tracking-**](https://github.com/Dhruv-413/Eye-Gaze-Tracking-)  <sub>Python  ·  pushed 1 year ago</sub>
+- [**Basic-ML-Projects**](https://github.com/Dhruv-413/Basic-ML-Projects)  <sub>Jupyter Notebook  ·  pushed 2 years ago</sub>
+<!-- recent ends -->
 
-Less a badge collection than a deliberate path: get the data layer right, learn to look at data before modelling it, then move up into supervised learning and generative systems.
-
-```mermaid
-flowchart LR
-    A["SQL<br/><small>IBM · Apr 2024</small>"] --> B["Exploratory<br/>Data Analysis<br/><small>IBM · Nov 2024</small>"]
-    A --> C["Foundations of<br/>Data Science<br/><small>Google · Nov 2024</small>"]
-    B --> D["Supervised<br/>Machine Learning<br/><small>IBM · Dec 2024</small>"]
-    C --> D
-    D --> E["Generative AI<br/>Fundamentals<br/><small>IBM · Apr 2025</small>"]
-    F["Software Engineering:<br/>Implementation & Testing<br/><small>HKUST · Nov 2024</small>"] --> E
-```
+</details>
 
 <details>
-<summary><b>Verification links</b></summary>
+<summary><b>Experience and credentials</b></summary>
 
 <br/>
+
+<table>
+<tr>
+<td width="32%" valign="top"><b>Deloitte</b><br/><sub>Data Migration and Modernization Analyst · 2026 to present</sub></td>
+<td valign="top">Moving enterprise data between legacy and modern SAP structures. A migration is judged entirely on what it did <em>not</em> lose, so most of the effort is reconciliation and verification rather than transfer.</td>
+</tr>
+<tr>
+<td valign="top"><b>ONGC</b><br/><sub>Summer Intern, Delhi · Jun–Aug 2025</sub></td>
+<td valign="top">Built a centralised SAP ABAP and HANA dashboard for oil-well management, replacing manual reporting spread across five departments. Cut reporting time by <b>40%</b> and preprocessed <b>8M+ records</b> with Python, FAISS and PyTorch.</td>
+</tr>
+<tr>
+<td valign="top"><b>SAP India Hackfest</b><br/><sub>National Finalist · Jul 2024</sub></td>
+<td valign="top">Led five people to a <b>Top 50 finish from 2000+ entries</b> with EcoHive. The lesson was in scoping: deciding what to cut so the rest worked end to end.</td>
+</tr>
+<tr>
+<td valign="top"><b>Manipal University Jaipur</b><br/><sub>B.Tech CSE, IoT and Intelligent Systems · 2022–2026, CGPA 8.06</sub></td>
+<td valign="top">Data structures, DBMS, operating systems and machine learning — plus the placement portal, which taught more about requirements than any course did.</td>
+</tr>
+</table>
+
+**Certifications** — a deliberate path rather than a badge collection: get the data layer right, learn to look at data before modelling it, then move up into supervised learning and generative systems.
 
 | Credential | Issuer | Date | |
 | :--- | :--- | :--- | :--- |
@@ -270,40 +216,13 @@ flowchart LR
 
 </details>
 
+<div align="center">
 <br/>
 
-## How this page builds itself
-
-<details>
-<summary><b>Two SVGs, and everything else in plain markdown</b></summary>
-
-<br/>
-
-The whole page is two committed images and a text file. That is a design decision rather than a limitation, and it is the second version — the first drew the statistics as SVG cards, which looked good and was wrong.
-
-The reason it was wrong: a `<picture>` element with `prefers-color-scheme` resolves against the reader's **operating system**, not their GitHub theme. Set GitHub to dark on a light laptop and every card arrives in the wrong palette. Markdown has no such failure mode, and it is also selectable, searchable, and legible to a screen reader. The character grid above is the same data the SVG heatmap held, and it cannot render in the wrong colours because it has none.
-
-| | |
-| :--- | :--- |
-| [`lib/github.py`](./lib/github.py) | One batched GraphQL pass. The commit history for thirty repositories arrives in a single aliased query; the obvious one-request-per-repository version took about thirty seconds. |
-| [`lib/theme.py`](./lib/theme.py) | Palette and geometry for the banner. Two themes ship as separate files, which is exactly the `prefers-color-scheme` compromise described above — acceptable for one decorative header, not for six data cards. |
-| [`scripts/build_banner.py`](./scripts/build_banner.py) | Draws the header. The point cloud is a seeded k-nearest-neighbour sketch, which is the same picture as the retrieval work described at the top and the only reason it earns the space. |
-| [`scripts/build_readme.py`](./scripts/build_readme.py) | Turns one API response into every table, bar and sparkline on this page. Standard library only. |
-| [`scripts/selftest.py`](./scripts/selftest.py) | Renders every block against a fixture and a deliberately empty account, then checks the markdown is well formed. Runs on every push, needs no token. |
-| [`.github/workflows/`](./.github/workflows/update-readme.yml) | Runs every six hours and commits only when a number actually changed. |
-
-</details>
-
-<br/>
-
-## Get in touch
-
-Open to AI/ML and full-stack collaboration, and happy to talk through anything above in more detail.
-
-<a href="https://dhruvgupta-nu.vercel.app"><img src="https://img.shields.io/badge/Portfolio-0B0D14?style=for-the-badge&logo=vercel&logoColor=FFFFFF" alt="Portfolio" /></a> <a href="https://www.linkedin.com/in/dhruvgpta/"><img src="https://img.shields.io/badge/LinkedIn-0B0D14?style=for-the-badge&logo=linkedin&logoColor=0A66C2" alt="LinkedIn" /></a> <a href="mailto:dhruvgupta6580@gmail.com"><img src="https://img.shields.io/badge/Email-0B0D14?style=for-the-badge&logo=gmail&logoColor=EA4335" alt="Email" /></a> <a href="https://dhruvgupta-nu.vercel.app/Dhruv_resume.pdf"><img src="https://img.shields.io/badge/R%C3%A9sum%C3%A9-0B0D14?style=for-the-badge&logo=readdotcv&logoColor=7C82F9" alt="Resume" /></a>
-
-<br/><br/>
+**Happy to talk through any of it.** &nbsp;·&nbsp; <a href="mailto:dhruvgupta6580@gmail.com">dhruvgupta6580@gmail.com</a>
 
 <sub><!-- updated starts -->
-_Rebuilt from the GitHub GraphQL API on 05 September 2026 at 05:02 IST._
+_Rebuilt from the GitHub GraphQL API on 05 September 2026 at 05:29 IST._
 <!-- updated ends --></sub>
+
+</div>
