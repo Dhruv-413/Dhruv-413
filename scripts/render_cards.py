@@ -921,57 +921,58 @@ STACK_W = 1200
 
 
 def render_stack():
-    """Category bands of brand-tinted chips that wrap across the full width."""
-    label_x, chip_x0, right = 26, 214, STACK_W - 26
-    chip_h, gap_x, gap_y = 34, 9, 10
+    """Uniform tile grid: large centred glyph over a brand-accented plinth."""
+    label_x, grid_x, right = 26, 172, STACK_W - 26
+    tile_w, tile_h, gap = 94, 86, 9
+    per_row = max(int((right - grid_x + gap) // (tile_w + gap)), 1)
 
-    bands = ""
-    y = 66
+    out = ""
+    y = 58
     delay = 0.0
     for bi, (heading, items) in enumerate(STACK):
         if bi:
-            bands += (
-                f'<line x1="26" y1="{y - 14:.1f}" x2="{right}" y2="{y - 14:.1f}" '
+            out += (
+                f'<line x1="26" y1="{y - 17:.1f}" x2="{right}" y2="{y - 17:.1f}" '
                 f'stroke="{LINE}" stroke-width="1" />'
             )
-        band_top = y
-        cx, cy = chip_x0, y
-        for name, slug, color in items:
-            w = 50 + len(name) * 7.3
-            if cx + w > right:
-                cx = chip_x0
-                cy += chip_h + gap_y
+        rows = (len(items) + per_row - 1) // per_row
+        band_h = rows * tile_h + (rows - 1) * gap
+
+        for i, (name, slug, color) in enumerate(items):
+            tx = grid_x + (i % per_row) * (tile_w + gap)
+            ty = y + (i // per_row) * (tile_h + gap)
             tone = for_dark(color)
-            glyph = icon(slug, cx + 11, cy + 8, 18)
-            swatch = (
+            glyph = icon(slug, tx + tile_w / 2 - 15, ty + 13, 30)
+            fallback = (
                 ""
                 if glyph
-                else f'<rect x="{cx + 13:.1f}" y="{cy + 12:.1f}" width="12" height="12" rx="3" fill="{tone}" />'
+                else f'<rect x="{tx + tile_w / 2 - 11:.1f}" y="{ty + 17:.1f}" width="22" '
+                f'height="22" rx="5" fill="{tone}" />'
             )
-            bands += (
+            out += (
                 f'<g class="tx" style="animation-delay:{delay:.2f}s">'
-                f'<rect x="{cx:.1f}" y="{cy:.1f}" width="{w:.1f}" height="{chip_h}" rx="{chip_h / 2}" '
-                f'fill="{tone}" fill-opacity="0.13" stroke="{tone}" stroke-opacity="0.42" '
+                f'<rect x="{tx:.1f}" y="{ty}" width="{tile_w}" height="{tile_h}" rx="11" '
+                f'fill="#ffffff" fill-opacity="0.045" stroke="{tone}" stroke-opacity="0.30" '
                 f'stroke-width="1" />'
-                f"{glyph}{swatch}"
-                f'<text x="{cx + 37:.1f}" y="{cy + 22:.1f}" fill="{INK}" font-size="13.5" '
-                f'font-family="{SANS}">{name}</text></g>'
+                f'<rect x="{tx + 26:.1f}" y="{ty + tile_h - 9}" width="{tile_w - 52}" height="3" '
+                f'rx="1.5" fill="{tone}" fill-opacity="0.85" />'
+                f"{glyph}{fallback}"
+                f'<text x="{tx + tile_w / 2:.1f}" y="{ty + 66}" fill="{INK}" font-size="11.5" '
+                f'text-anchor="middle" font-family="{SANS}">{name}</text></g>'
             )
-            cx += w + gap_x
             delay += 0.02
 
-        band_h = cy + chip_h - band_top
-        bands += (
-            f'<text x="{label_x}" y="{band_top + band_h / 2 + 4:.1f}" fill="{MUTED}" '
+        out += (
+            f'<text x="{label_x}" y="{y + band_h / 2 + 4:.1f}" fill="{MUTED}" '
             f'font-size="10.5" font-family="{MONO}" letter-spacing="1.8">{heading}</text>'
         )
-        y = cy + chip_h + 34
+        y += band_h + 34
 
     height = y - 34 + 26
-    body = f'''{frame(STACK_W, height, "LEGEND &#183; TECHNOLOGY", "map key")}
-  {bands}
+    body = f'''{frame(STACK_W, height, "TOOLKIT &#183; TECHNOLOGY", "map key")}
+  {out}
   {outline(STACK_W, height)}'''
-    return doc(STACK_W, height, "technology legend", body)
+    return doc(STACK_W, height, "technology toolkit", body)
 
 
 def main():
