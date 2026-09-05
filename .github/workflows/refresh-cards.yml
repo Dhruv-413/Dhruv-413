@@ -18,7 +18,7 @@ jobs:
           token: ${{ secrets.PROFILE_PAT }}
 
       - name: Generate language chart
-        uses: cicirello/user-statistician@v1
+        uses: cicirello/user-statistician@36500351ea14b69e68217d4c89eb0f3f06680b17 # v1
         env:
           GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
         with:
@@ -41,7 +41,7 @@ jobs:
           theme: dracula
 
       - name: Generate contribution snake
-        uses: Platane/snk@v3
+        uses: Platane/snk@d8f6715049803e982ee5ff501b6b9b7d5deeb09b # v3
         with:
           github_user_name: Dhruv-413
           github_token: ${{ secrets.PROFILE_PAT }}
