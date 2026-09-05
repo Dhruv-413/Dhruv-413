@@ -708,7 +708,7 @@ def render_activity(user):
     return doc(PROF_W, PROF_H, "weekly contribution elevation profile", body)
 
 
-LANG_W, LANG_H = 592, 300
+LANG_W, LANG_H = 592, 320
 
 
 def _worst(row, side):
@@ -823,7 +823,22 @@ def render_languages(user):
     return doc(LANG_W, LANG_H, "language land cover", body)
 
 
-STAT_W, STAT_H = 592, 300
+STAT_W, STAT_H = 592, 320
+
+
+def streak_tile(x, y, w, h, value, unit, label, accent, delay):
+    return (
+        f'<g class="tx" style="animation-delay:{delay:.2f}s">'
+        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="10" fill="{accent}" '
+        f'fill-opacity="0.11" stroke="{accent}" stroke-opacity="0.40" stroke-width="1" />'
+        f'<text x="{x + w / 2}" y="{y + 54}" fill="{INK}" font-size="42" font-weight="700" '
+        f'text-anchor="middle" font-family="{SANS}">{value}</text>'
+        f'<text x="{x + w / 2}" y="{y + 74}" fill="{accent}" font-size="11" '
+        f'text-anchor="middle" font-family="{MONO}" letter-spacing="1.6">{unit}</text>'
+        f'<text x="{x + w / 2}" y="{y + 95}" fill="{MUTED}" font-size="10" '
+        f'text-anchor="middle" font-family="{MONO}" letter-spacing="1.3">{label}</text>'
+        f"</g>"
+    )
 
 
 def render_stats(user):
@@ -836,107 +851,125 @@ def render_stats(user):
     prs = contrib["totalPullRequestContributions"]
     issues = contrib["totalIssueContributions"]
     mix = [("Commits", commits, PINK), ("Pull requests", prs, PURPLE), ("Issues", issues, CYAN)]
-    total = max(commits + prs + issues, 1)
+    top = max(commits, prs, issues, 1)
 
-    cx, cy, r = 132, 178, 62
-    circ = 2 * math.pi * r
-    arcs = ""
-    acc = 0.0
-    for i, (_, value, color) in enumerate(mix):
-        frac = value / total
-        if frac <= 0:
-            continue
-        arcs += (
-            f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{color}" '
-            f'stroke-width="19" pathLength="1" '
-            f'stroke-dasharray="{frac:.5f} {1 - frac:.5f}" '
-            f'stroke-dashoffset="{-acc:.5f}" '
-            f'transform="rotate(-90 {cx} {cy})" />'
-        )
-        acc += frac
+    tiles = streak_tile(26, 60, 132, 110, current, "DAY" if current == 1 else "DAYS",
+                        "CURRENT STREAK", GREEN, 0.10)
+    tiles += streak_tile(166, 60, 132, 110, longest, "DAY" if longest == 1 else "DAYS",
+                         "LONGEST STREAK", PINK, 0.18)
 
-    donut = (
-        f'<g class="tx" style="animation-delay:0.15s">'
-        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="#ffffff" '
-        f'stroke-opacity="0.06" stroke-width="19" />{arcs}'
-        f'</g>'
-        f'<g class="tx" style="animation-delay:0.35s">'
-        f'<text x="{cx}" y="{cy - 2}" fill="{INK}" font-size="27" font-weight="700" '
-        f'text-anchor="middle" font-family="{SANS}">{total:,}</text>'
-        f'<text x="{cx}" y="{cy + 17}" fill="{DIM}" font-size="10" text-anchor="middle" '
-        f'font-family="{MONO}" letter-spacing="1.2">CONTRIBUTIONS</text></g>'
-    )
-
-    legend = ""
-    ly = 80
+    bar_x = 314
+    bar_w = STAT_W - 26 - bar_x
+    rows = ""
     for i, (label, value, color) in enumerate(mix):
-        legend += (
-            f'<g class="tx" style="animation-delay:{0.08 * i:.2f}s">'
-            f'<rect x="238" y="{ly - 9}" width="10" height="10" rx="3" fill="{color}" />'
-            f'<text x="256" y="{ly}" fill="{MUTED}" font-size="12.5" font-family="{SANS}">{label}</text>'
-            f'<text x="{STAT_W - 26}" y="{ly}" fill="{INK}" font-size="13" font-weight="600" '
-            f'font-family="{MONO}" text-anchor="end">{value:,}</text></g>'
+        ry = 80 + i * 38
+        rows += (
+            f'<g class="tx" style="animation-delay:{0.24 + 0.06 * i:.2f}s">'
+            f'<text x="{bar_x}" y="{ry}" fill="{MUTED}" font-size="12" '
+            f'font-family="{SANS}">{label}</text>'
+            f'<text x="{STAT_W - 26}" y="{ry}" fill="{INK}" font-size="14" font-weight="700" '
+            f'font-family="{MONO}" text-anchor="end">{value:,}</text>'
+            f'<rect x="{bar_x}" y="{ry + 8}" width="{bar_w}" height="7" rx="3.5" '
+            f'fill="#ffffff" fill-opacity="0.07" />'
+            f'<rect x="{bar_x}" y="{ry + 8}" width="{max(bar_w * value / top, 5):.1f}" '
+            f'height="7" rx="3.5" fill="{color}" />'
+            f"</g>"
         )
-        ly += 26
+
+    # Last 30 days on the same hypsometric ramp the terrain cards use.
+    recent = days[-30:]
+    peak = max((c for _, c in recent), default=0) or 1
+    cell, gap = 14, 4
+    strip = ""
+    for i, (_, count) in enumerate(recent):
+        sx = 26 + i * (cell + gap)
+        fill = tint(0.25 + 0.75 * (count / peak)) if count else "#ffffff"
+        op = "1" if count else "0.07"
+        strip += (
+            f'<rect x="{sx}" y="230" width="{cell}" height="{cell}" rx="3.5" '
+            f'fill="{fill}" fill-opacity="{op}" />'
+        )
 
     figures = [
-        ("CURRENT STREAK", f"{current}d", GREEN),
-        ("LONGEST STREAK", f"{longest}d", PINK),
-        ("STARS EARNED", f"{stars:,}", PURPLE),
-        ("FOLLOWERS", f"{user['followers']['totalCount']}", CYAN),
+        (f"{user['repositories']['totalCount']}", "REPOS"),
+        (f"{stars:,}", "STARS"),
+        (f"{user['followers']['totalCount']}", "FOLLOWERS"),
     ]
-    tiles = f'<line x1="238" y1="168" x2="{STAT_W - 26}" y2="168" stroke="{LINE}" stroke-width="1" />'
-    for i, (label, value, color) in enumerate(figures):
-        tx = 238 + (i % 2) * 168
-        ty = 200 + (i // 2) * 54
-        tiles += (
-            f'<g class="tx" style="animation-delay:{0.3 + 0.06 * i:.2f}s">'
-            f'<line x1="{tx}" y1="{ty - 14}" x2="{tx}" y2="{ty + 8}" stroke="{color}" stroke-width="2" />'
-            f'<text x="{tx + 11}" y="{ty}" fill="{INK}" font-size="20" font-weight="700" '
+    foot = ""
+    for i, (value, label) in enumerate(figures):
+        fx = 26 + i * 138
+        foot += (
+            f'<g class="tx" style="animation-delay:{0.44 + 0.05 * i:.2f}s">'
+            f'<text x="{fx}" y="296" fill="{INK}" font-size="17" font-weight="700" '
             f'font-family="{SANS}">{value}</text>'
-            f'<text x="{tx + 11}" y="{ty + 18}" fill="{DIM}" font-size="9.5" '
-            f'font-family="{MONO}" letter-spacing="1.1">{label}</text></g>'
+            f'<text x="{fx + 8 + len(value) * 10}" y="296" fill="{DIM}" font-size="10" '
+            f'font-family="{MONO}" letter-spacing="1.2">{label}</text></g>'
         )
 
-    body = f'''{frame(STAT_W, STAT_H, "CONTRIBUTION MIX &#183; 12 MONTHS", "@" + USERNAME)}
-  {donut}{legend}{tiles}
+    body = f'''{frame(STAT_W, STAT_H, "ACTIVITY &#183; 12 MONTHS", "@" + USERNAME)}
+  {tiles}{rows}
+  <text x="26" y="218" fill="{MUTED}" font-size="10" font-family="{MONO}"
+        letter-spacing="1.6">LAST 30 DAYS</text>
+  {strip}
+  <line x1="26" y1="266" x2="{STAT_W - 26}" y2="266" stroke="{LINE}" stroke-width="1" />
+  {foot}
   {outline(STAT_W, STAT_H)}'''
-    return doc(STAT_W, STAT_H, "contribution mix", body)
+    return doc(STAT_W, STAT_H, "activity statistics", body)
 
 
 STACK_W = 1200
 
 
 def render_stack():
-    col_w = (STACK_W - 52) / 3
-    row_h = 30
-    tallest = max(len(items) for _, items in STACK)
-    height = 74 + tallest * row_h + 22
+    """Category bands of brand-tinted chips that wrap across the full width."""
+    label_x, chip_x0, right = 26, 214, STACK_W - 26
+    chip_h, gap_x, gap_y = 34, 9, 10
 
-    out = ""
-    for ci, (heading, items) in enumerate(STACK):
-        x = 26 + ci * col_w
-        out += (
-            f'<text x="{x:.1f}" y="72" fill="{MUTED}" font-size="10.5" '
-            f'font-family="{MONO}" letter-spacing="1.8">{heading}</text>'
-        )
-        for ri, (name, slug, color) in enumerate(items):
-            y = 72 + 26 + ri * row_h
-            glyph = icon(slug, x, y - 14, 19)
+    bands = ""
+    y = 66
+    delay = 0.0
+    for bi, (heading, items) in enumerate(STACK):
+        if bi:
+            bands += (
+                f'<line x1="26" y1="{y - 14:.1f}" x2="{right}" y2="{y - 14:.1f}" '
+                f'stroke="{LINE}" stroke-width="1" />'
+            )
+        band_top = y
+        cx, cy = chip_x0, y
+        for name, slug, color in items:
+            w = 50 + len(name) * 7.3
+            if cx + w > right:
+                cx = chip_x0
+                cy += chip_h + gap_y
+            tone = for_dark(color)
+            glyph = icon(slug, cx + 11, cy + 8, 18)
             swatch = (
                 ""
                 if glyph
-                else f'<rect x="{x + 4}" y="{y - 10}" width="11" height="11" rx="3" fill="{for_dark(color)}" />'
+                else f'<rect x="{cx + 13:.1f}" y="{cy + 12:.1f}" width="12" height="12" rx="3" fill="{tone}" />'
             )
-            out += (
-                f'<g class="tx" style="animation-delay:{0.025 * (ci * 3 + ri):.2f}s">'
-                f'{plate(x, y - 14, 19, 5)}{glyph}{swatch}'
-                f'<text x="{x + 30:.1f}" y="{y:.1f}" fill="{INK}" font-size="13.5" '
+            bands += (
+                f'<g class="tx" style="animation-delay:{delay:.2f}s">'
+                f'<rect x="{cx:.1f}" y="{cy:.1f}" width="{w:.1f}" height="{chip_h}" rx="{chip_h / 2}" '
+                f'fill="{tone}" fill-opacity="0.13" stroke="{tone}" stroke-opacity="0.42" '
+                f'stroke-width="1" />'
+                f"{glyph}{swatch}"
+                f'<text x="{cx + 37:.1f}" y="{cy + 22:.1f}" fill="{INK}" font-size="13.5" '
                 f'font-family="{SANS}">{name}</text></g>'
             )
+            cx += w + gap_x
+            delay += 0.02
 
+        band_h = cy + chip_h - band_top
+        bands += (
+            f'<text x="{label_x}" y="{band_top + band_h / 2 + 4:.1f}" fill="{MUTED}" '
+            f'font-size="10.5" font-family="{MONO}" letter-spacing="1.8">{heading}</text>'
+        )
+        y = cy + chip_h + 34
+
+    height = y - 34 + 26
     body = f'''{frame(STACK_W, height, "LEGEND &#183; TECHNOLOGY", "map key")}
-  {out}
+  {bands}
   {outline(STACK_W, height)}'''
     return doc(STACK_W, height, "technology legend", body)
 
