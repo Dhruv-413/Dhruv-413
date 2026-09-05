@@ -1,0 +1,37 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="80%" cy="15%" r="75%">
+      <stop offset="0%" stop-color="#bd93f9" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#bd93f9" stop-opacity="0" />
+    </radialGradient>
+    <clipPath id="panelClip">
+      <rect x="1" y="1" width="1198" height="298" rx="14" />
+    </clipPath>
+    <style>
+      @keyframes fadeSlide { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+      @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+      .line { opacity: 0; animation: fadeSlide 0.45s ease forwards; }
+      .cursor { animation: blink 1s steps(1) infinite; }
+      .status-dot { animation: pulse 1.8s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <g clip-path="url(#panelClip)">
+    <rect x="0" y="0" width="1200" height="300" fill="#1e1f29" />
+    <rect x="0" y="0" width="1200" height="300" fill="url(#glow)" />
+  </g>
+  <rect x="1" y="1" width="1198" height="298" rx="14" fill="none" stroke="#3b3d54" stroke-width="1.5" />
+
+  <line x1="0" y1="40" x2="1200" y2="40" stroke="#3b3d54" stroke-width="1" />
+  <circle cx="28" cy="20" r="6" fill="#ff5555" />
+  <circle cx="50" cy="20" r="6" fill="#f1fa8c" />
+  <circle cx="72" cy="20" r="6" fill="#50fa7b" />
+  <text x="96" y="25" fill="#6272a4" font-size="14" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace">dhruv.ts</text>
+  <text x="1176" y="25" fill="#6272a4" font-size="13" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" text-anchor="end">~/profile</text>
+
+  <text class="line" style="animation-delay:0.08s" x="52" y="88" fill="#4b4d6b" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" text-anchor="end">1</text><text class="line" style="animation-delay:0.08s" x="78" y="88" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" xml:space="preserve"><tspan fill="#ff79c6">const </tspan><tspan fill="#8be9fd">dhruv</tspan><tspan fill="#f8f8f2"> = {</tspan></text><text class="line" style="animation-delay:0.17s" x="52" y="120" fill="#4b4d6b" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" text-anchor="end">2</text><text class="line" style="animation-delay:0.17s" x="78" y="120" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" xml:space="preserve"><tspan fill="#f8f8f2">  name</tspan><tspan fill="#f8f8f2">: </tspan><tspan fill="#f1fa8c">"Dhruv Gupta"</tspan><tspan fill="#f8f8f2">,</tspan></text><text class="line" style="animation-delay:0.26s" x="52" y="152" fill="#4b4d6b" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" text-anchor="end">3</text><text class="line" style="animation-delay:0.26s" x="78" y="152" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" xml:space="preserve"><tspan fill="#f8f8f2">  role</tspan><tspan fill="#f8f8f2">: </tspan><tspan fill="#f1fa8c">"Machine Learning + Full-Stack"</tspan><tspan fill="#f8f8f2">,</tspan></text><text class="line" style="animation-delay:0.35s" x="52" y="184" fill="#4b4d6b" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" text-anchor="end">4</text><text class="line" style="animation-delay:0.35s" x="78" y="184" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" xml:space="preserve"><tspan fill="#f8f8f2">  studying</tspan><tspan fill="#f8f8f2">: </tspan><tspan fill="#f1fa8c">"CSE, IoT and Intelligent Systems"</tspan><tspan fill="#f8f8f2">,</tspan></text><text class="line" style="animation-delay:0.44s" x="52" y="216" fill="#4b4d6b" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" text-anchor="end">5</text><text class="line" style="animation-delay:0.44s" x="78" y="216" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" xml:space="preserve"><tspan fill="#f8f8f2">  focus</tspan><tspan fill="#f8f8f2">: [</tspan><tspan fill="#f1fa8c">"React"</tspan><tspan fill="#f8f8f2">, </tspan><tspan fill="#f1fa8c">"Python"</tspan><tspan fill="#f8f8f2">, </tspan><tspan fill="#f1fa8c">"Systems Design"</tspan><tspan fill="#f8f8f2">],</tspan></text><text class="line" style="animation-delay:0.53s" x="52" y="248" fill="#4b4d6b" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" text-anchor="end">6</text><text class="line" style="animation-delay:0.53s" x="78" y="248" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" xml:space="preserve"><tspan fill="#f8f8f2">  status</tspan><tspan fill="#f8f8f2">: </tspan><tspan fill="#50fa7b">"open_to_work"</tspan><tspan fill="#f8f8f2">,</tspan></text><text class="line" style="animation-delay:0.62s" x="52" y="280" fill="#4b4d6b" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" text-anchor="end">7</text><text class="line" style="animation-delay:0.62s" x="78" y="280" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" xml:space="preserve"><tspan fill="#f8f8f2">};</tspan></text>
+
+  <circle class="status-dot" cx="377" cy="243" r="4" fill="#50fa7b" />
+  <text class="cursor" x="132" y="280" fill="#f8f8f2" font-size="18" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace">&#9608;</text>
+</svg>

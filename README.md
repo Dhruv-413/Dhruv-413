@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:282A36,50:BD93F9,100:FF79C6&height=160&section=header&text=Dhruv%20Gupta&fontSize=42&fontColor=F8F8F2&animation=fadeIn&fontAlignY=35&desc=Machine%20Learning%20%C2%B7%20Full-Stack%20Engineer&descAlignY=55&descSize=18" width="100%" alt="header banner" />
+  <img src="assets/header.svg" width="100%" alt="dhruv.ts" />
 </div>
 
 <p align="center">
