@@ -78,7 +78,7 @@ Thanks for visiting my GitHub, looking forward to connecting and building someth
 </div>
 
 <div align="center">
-  <img src="assets/snake.svg" width="100%" alt="live contribution snake"  />
+  <img src="assets/activity.svg" width="100%" alt="activity chart"  />
 </div>
 
 ###

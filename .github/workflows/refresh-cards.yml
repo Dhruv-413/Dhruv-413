@@ -17,20 +17,20 @@ jobs:
         with:
           token: ${{ secrets.PROFILE_PAT }}
 
-      - name: Generate language chart
-        uses: cicirello/user-statistician@36500351ea14b69e68217d4c89eb0f3f06680b17 # v1
+      - name: Generate language card
+        uses: vn7n24fzkq/github-profile-summary-cards@d9632798b299e9ad6940449a859c30742eb5b549 # v0.12.0
+        with:
+          USERNAME: Dhruv-413
+          THEME: dracula
+          ANIMATION: fade
+          AUTO_PUSH: false
         env:
           GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
-        with:
-          image-file: assets/languages.svg
-          category-order: languages
-          include-title: false
-          colors: "#282a36 #bd93f9 #ff79c6 #f8f8f2 #f8f8f2"
-          border-radius: 10
-          show-border: true
-          animated-language-chart: true
-          max-languages: 6
-          commit-and-push: false
+
+      - name: Move language card into assets
+        run: |
+          mv profile-summary-card-output/dracula/1-repos-per-language.svg assets/languages.svg
+          rm -rf profile-summary-card-output
 
       - name: Generate trophy graph
         uses: ryo-ma/github-profile-trophy@e3c89df995e92e67cdd4b2acaab9d974583dc1f7 # master, includes theme input (post-v1.0)
@@ -40,18 +40,18 @@ jobs:
           token: ${{ secrets.PROFILE_PAT }}
           theme: dracula
 
-      - name: Generate contribution snake
-        uses: Platane/snk@d8f6715049803e982ee5ff501b6b9b7d5deeb09b # v3
-        with:
-          github_user_name: Dhruv-413
-          github_token: ${{ secrets.PROFILE_PAT }}
-          outputs: |
-            assets/snake.svg?color_snake=%2350fa7b&color_dots=%23282a36,%2344475a,%236272a4,%23bd93f9,%23ff79c6
+      - name: Generate activity chart
+        run: python3 scripts/render_activity.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
+          GITHUB_USER: Dhruv-413
+          OUT_PATH: assets/activity.svg
 
       - name: Commit generated graphics
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/languages.svg assets/trophy.svg assets/snake.svg
+          git rm --ignore-unmatch -q assets/snake.svg
+          git add assets/languages.svg assets/trophy.svg assets/activity.svg
           git diff --cached --quiet || git commit -m "chore: refresh profile graphics"
           git push
