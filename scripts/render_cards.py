@@ -9,8 +9,9 @@ import hashlib
 import json
 import math
 import os
+import re
+import urllib.error
 import urllib.request
-from datetime import date
 
 USERNAME = os.environ.get("GITHUB_USER", "Dhruv-413")
 TOKEN = os.environ["GITHUB_TOKEN"]
@@ -41,6 +42,76 @@ RAMP = [
 SANS = "Segoe UI, Helvetica Neue, Helvetica, Arial, sans-serif"
 MONO = "SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace"
 
+DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/{}.svg"
+ICON_LIMIT = 30_000
+
+# GitHub language name -> devicon slug.
+LANG_ICON = {
+    "Python": "python/python-original",
+    "JavaScript": "javascript/javascript-original",
+    "TypeScript": "typescript/typescript-original",
+    "Jupyter Notebook": "jupyter/jupyter-original",
+    "HTML": "html5/html5-original",
+    "CSS": "css3/css3-original",
+    "SCSS": "sass/sass-original",
+    "Java": "java/java-original",
+    "Go": "go/go-original",
+    "C++": "cplusplus/cplusplus-original",
+    "C": "c/c-original",
+    "C#": "csharp/csharp-original",
+    "Shell": "bash/bash-original",
+    "Dockerfile": "docker/docker-original",
+    "Dart": "dart/dart-original",
+    "Kotlin": "kotlin/kotlin-original",
+    "PHP": "php/php-original",
+    "Ruby": "ruby/ruby-original",
+    "Swift": "swift/swift-original",
+    "Rust": "rust/rust-original",
+    "Vue": "vuejs/vuejs-original",
+    "PowerShell": "powershell/powershell-original",
+}
+
+STACK = [
+    (
+        "LANGUAGES &#38; ML",
+        [
+            ("Python", "python/python-original", "#3776AB"),
+            ("TypeScript", "typescript/typescript-original", "#3178C6"),
+            ("JavaScript", "javascript/javascript-original", "#F7DF1E"),
+            ("Go", "go/go-original", "#00ADD8"),
+            ("PyTorch", "pytorch/pytorch-original", "#EE4C2C"),
+            ("TensorFlow", "tensorflow/tensorflow-original", "#FF6F00"),
+            ("Pandas", "pandas/pandas-original", "#150458"),
+            ("NumPy", "numpy/numpy-original", "#013243"),
+            ("Jupyter", "jupyter/jupyter-original", "#F37626"),
+        ],
+    ),
+    (
+        "WEB &#38; DATA",
+        [
+            ("React", "react/react-original", "#61DAFB"),
+            ("FastAPI", "fastapi/fastapi-original", "#009688"),
+            ("Tailwind", "tailwindcss/tailwindcss-original", "#06B6D4"),
+            ("PostgreSQL", "postgresql/postgresql-original", "#4169E1"),
+            ("MySQL", "mysql/mysql-original", "#4479A1"),
+            ("Redis", "redis/redis-original", "#DC382D"),
+            ("Firebase", "firebase/firebase-plain", "#FFCA28"),
+            ("Supabase", "supabase/supabase-original", "#3ECF8E"),
+        ],
+    ),
+    (
+        "TOOLS &#38; CLOUD",
+        [
+            ("Docker", "docker/docker-original", "#2496ED"),
+            ("Git", "git/git-original", "#F05032"),
+            ("Azure", "azure/azure-original", "#0078D4"),
+            ("Linux", "linux/linux-plain", "#FCC624"),
+            ("GitLab", "gitlab/gitlab-original", "#FC6D26"),
+            ("npm", "npm/npm-original-wordmark", "#CB3837"),
+        ],
+    ),
+]
+
 QUERY = """
 query($login: String!) {
   user(login: $login) {
@@ -68,6 +139,8 @@ query($login: String!) {
 }
 """
 
+_icon_cache = {}
+
 
 def fetch():
     body = json.dumps({"query": QUERY, "variables": {"login": USERNAME}}).encode()
@@ -87,6 +160,44 @@ def fetch():
     return payload["data"]["user"]
 
 
+def icon(slug, x, y, size):
+    """Inline a devicon as a nested <svg>; external refs never load inside <img>."""
+    if slug not in _icon_cache:
+        try:
+            with urllib.request.urlopen(DEVICON.format(slug), timeout=20) as resp:
+                raw = resp.read().decode("utf-8", "replace")
+            if len(raw) > ICON_LIMIT:
+                raw = None
+        except (urllib.error.URLError, TimeoutError, OSError):
+            raw = None
+        if raw:
+            raw = re.sub(r"<\?xml.*?\?>", "", raw, flags=re.S)
+            raw = re.sub(r"<!--.*?-->", "", raw, flags=re.S)
+            m = re.search(r'viewBox="([^"]+)"', raw)
+            view = m.group(1) if m else "0 0 128 128"
+            inner = re.sub(r"^.*?<svg[^>]*>", "", raw, flags=re.S)
+            inner = re.sub(r"</svg>\s*$", "", inner, flags=re.S)
+            _icon_cache[slug] = (view, inner.strip())
+        else:
+            _icon_cache[slug] = None
+
+    entry = _icon_cache.get(slug)
+    if not entry:
+        return ""
+    view, inner = entry
+    return (
+        f'<svg x="{x:.1f}" y="{y:.1f}" width="{size}" height="{size}" '
+        f'viewBox="{view}" overflow="visible">{inner}</svg>'
+    )
+
+
+def plate(x, y, size, radius=6):
+    return (
+        f'<rect x="{x - 4:.1f}" y="{y - 4:.1f}" width="{size + 8}" height="{size + 8}" '
+        f'rx="{radius}" fill="#ffffff" fill-opacity="0.06" />'
+    )
+
+
 def tint(t):
     t = min(max(t, 0.0), 1.0)
     for i in range(len(RAMP) - 1):
@@ -101,17 +212,20 @@ def tint(t):
 
 
 def for_dark(hex_color):
-    """Lift very dark brand colours so swatches stay visible on the panel."""
-    h = hex_color.lstrip("#")
+    """Lift very dark brand colours so they stay visible on the panel."""
+    h = (hex_color or "#8b93b0").lstrip("#")
+    if len(h) != 6:
+        h = "8b93b0"
     r, g, b = (int(h[i : i + 2], 16) for i in (0, 2, 4))
     lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
     if lum >= 0.34:
         return f"#{h}"
     k = (0.34 - lum) / 0.34 * 0.72
-    r = round(r + (255 - r) * k)
-    g = round(g + (255 - g) * k)
-    b = round(b + (255 - b) * k)
-    return "#%02x%02x%02x" % (r, g, b)
+    return "#%02x%02x%02x" % (
+        round(r + (255 - r) * k),
+        round(g + (255 - g) * k),
+        round(b + (255 - b) * k),
+    )
 
 
 def jitter(index, salt):
@@ -137,7 +251,8 @@ def defs(extra=""):
       .ln path {{ stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 2.2s ease-out forwards; }}
       .pk {{ opacity: 0; animation: glow 3.4s ease-in-out infinite; }}
       .tx {{ opacity: 0; animation: rise 0.7s cubic-bezier(.2,.7,.3,1) forwards; }}
-      .bar {{ transform-origin: left center; animation: wipe 0.9s cubic-bezier(.2,.7,.3,1) forwards; }}
+      .bar {{ transform-origin: left center; animation: wipe 1s cubic-bezier(.2,.7,.3,1) forwards; }}
+      .arc {{ stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.3s cubic-bezier(.2,.7,.3,1) forwards; }}
     </style>
     {extra}
   </defs>'''
@@ -145,10 +260,6 @@ def defs(extra=""):
 
 def frame(w, h, title, right=""):
     """Neat line, title block and source note shared by every panel."""
-    head = (
-        f'<text x="22" y="30" fill="{MUTED}" font-size="11.5" font-family="{MONO}" '
-        f'letter-spacing="2.4">{title}</text>'
-    )
     note = (
         f'<text x="{w - 22}" y="30" fill="{DIM}" font-size="11" font-family="{MONO}" '
         f'text-anchor="end">{right}</text>'
@@ -157,7 +268,8 @@ def frame(w, h, title, right=""):
     )
     return f'''<rect width="{w}" height="{h}" rx="14" fill="{SURFACE}" />
   <rect width="{w}" height="{h}" filter="url(#grain)" opacity="0.05" />
-  {head}{note}
+  <text x="22" y="30" fill="{MUTED}" font-size="11.5" font-family="{MONO}"
+        letter-spacing="2.4">{title}</text>{note}
   <line x1="22" y1="44" x2="{w - 22}" y2="44" stroke="{LINE}" stroke-width="1" />'''
 
 
@@ -171,7 +283,9 @@ def outline(w, h):
 def doc(w, h, label, body, extra_defs=""):
     return (
         f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
-        f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{label}">'
+        f'xmlns="http://www.w3.org/2000/svg" '
+        f'xmlns:xlink="http://www.w3.org/1999/xlink" '
+        f'role="img" aria-label="{label}">'
         f"{defs(extra_defs)}{body}</svg>\n"
     )
 
@@ -185,11 +299,11 @@ def weekly(user):
 
 def daily(user):
     cal = user["contributionsCollection"]["contributionCalendar"]
-    out = []
-    for w in cal["weeks"]:
-        for d in w["contributionDays"]:
-            out.append((d["date"], d["contributionCount"]))
-    return out
+    return [
+        (d["date"], d["contributionCount"])
+        for w in cal["weeks"]
+        for d in w["contributionDays"]
+    ]
 
 
 def streaks(days):
@@ -209,7 +323,7 @@ def streaks(days):
 
 
 # --------------------------------------------------------------------------- #
-# Terrain field shared by the header
+# Terrain field shared by the header and footer
 # --------------------------------------------------------------------------- #
 
 COLS, ROWS = 176, 50
@@ -350,18 +464,8 @@ def chaikin(pts, iterations=2):
     return pts
 
 
-# --------------------------------------------------------------------------- #
-# Cards
-# --------------------------------------------------------------------------- #
-
-HEAD_W, HEAD_H = 1200, 320
-
-
-def render_header(user):
-    weeks, _, total = weekly(user)
-    field = build_field(weeks)
-    sx, sy = HEAD_W / (COLS - 1), HEAD_H / (ROWS - 1)
-
+def contour_layers(field, w, h, flip=False, opacity=1.0):
+    sx, sy = w / (COLS - 1), h / (ROWS - 1)
     layers = []
     for li in range(1, LEVELS):
         paths = chain(marching_squares(field, li / LEVELS))
@@ -371,18 +475,33 @@ def render_header(user):
         body = ""
         for p in paths:
             pts = chaikin(p)
-            d = f"M{pts[0][0] * sx:.1f} {pts[0][1] * sy:.1f}" + "".join(
-                f"L{x * sx:.1f} {y * sy:.1f}" for x, y in pts[1:]
+            coords = [
+                (x * sx, (h - y * sy) if flip else y * sy) for x, y in pts
+            ]
+            d = f"M{coords[0][0]:.1f} {coords[0][1]:.1f}" + "".join(
+                f"L{x:.1f} {y:.1f}" for x, y in coords[1:]
             )
             body += f'<path d="{d}" pathLength="1" style="animation-delay:{0.15 + t * 0.9:.2f}s" />'
         layers.append(
             f'<g class="ln" fill="none" stroke="{tint(t)}" stroke-width="{0.9 + 0.9 * t:.2f}" '
-            f'stroke-opacity="{0.32 + 0.50 * t:.2f}" stroke-linecap="round" '
+            f'stroke-opacity="{(0.32 + 0.50 * t) * opacity:.2f}" stroke-linecap="round" '
             f'stroke-linejoin="round">{body}</g>'
         )
+    return "".join(layers)
 
+
+# --------------------------------------------------------------------------- #
+# Cards
+# --------------------------------------------------------------------------- #
+
+HEAD_W, HEAD_H = 1200, 320
+
+
+def render_header(user, field):
+    weeks, _, total = weekly(user)
     peak = max(weeks) or 1
     span = max(len(weeks) - 1, 1)
+
     dots = ""
     for n, i in enumerate(sorted(range(len(weeks)), key=lambda k: weeks[k], reverse=True)[:6]):
         if weeks[i] <= 0:
@@ -419,25 +538,60 @@ def render_header(user):
     <rect width="{HEAD_W}" height="{HEAD_H}" fill="{BG}" />
     <rect width="{HEAD_W}" height="{HEAD_H}" fill="url(#g1)" />
     <rect width="{HEAD_W}" height="{HEAD_H}" fill="url(#g2)" />
-    {"".join(layers)}{dots}
+    {contour_layers(field, HEAD_W, HEAD_H)}{dots}
     <rect width="{HEAD_W}" height="{HEAD_H}" fill="url(#scrim)" />
     <rect width="{HEAD_W}" height="{HEAD_H}" fill="url(#halo)" />
     <rect width="{HEAD_W}" height="{HEAD_H}" filter="url(#grain)" opacity="0.05" />
     <g class="tx" style="animation-delay:0.15s">
-      <text x="64" y="132" fill="{INK}" font-size="54" font-weight="700" letter-spacing="2"
+      <text x="64" y="128" fill="{INK}" font-size="54" font-weight="700" letter-spacing="2"
             font-family="{SANS}">Dhruv Gupta</text>
     </g>
     <g class="tx" style="animation-delay:0.30s">
-      <text x="66" y="170" fill="{PINK}" font-size="19" font-weight="600" letter-spacing="1.4"
-            font-family="{SANS}">Machine Learning &#183; Full&#8209;Stack Engineering</text>
+      <circle cx="72" cy="163" r="4.5" fill="{GREEN}" class="pk" style="animation-delay:0.9s" />
+      <text x="88" y="169" fill="{PINK}" font-size="19" font-weight="600" letter-spacing="1.2"
+            font-family="{SANS}">Software Engineer at Deloitte</text>
     </g>
     <g class="tx" style="animation-delay:0.45s">
-      <text x="66" y="214" fill="{MUTED}" font-size="13.5" font-family="{MONO}">terrain mapped from {total:,} contributions this year</text>
+      <text x="66" y="207" fill="{MUTED}" font-size="13.5" font-family="{MONO}">machine learning &#183; full&#8209;stack &#183; distributed systems</text>
+    </g>
+    <g class="tx" style="animation-delay:0.60s">
+      <text x="66" y="232" fill="{DIM}" font-size="12" font-family="{MONO}">terrain mapped from {total:,} contributions this year</text>
     </g>
   </g>
   <rect x="0.75" y="0.75" width="{HEAD_W - 1.5}" height="{HEAD_H - 1.5}" rx="16" fill="none"
         stroke="#3b3d54" stroke-width="1.5" />'''
     return doc(HEAD_W, HEAD_H, f"{USERNAME} contribution terrain", body, grads)
+
+
+FOOT_W, FOOT_H = 1200, 150
+
+
+def render_footer(field):
+    grads = f'''<linearGradient id="fscrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="{BG}" stop-opacity="0.92" />
+      <stop offset="62%" stop-color="{BG}" stop-opacity="0.78" />
+      <stop offset="88%" stop-color="{BG}" stop-opacity="0.34" />
+      <stop offset="100%" stop-color="{BG}" stop-opacity="0" />
+    </linearGradient>
+    <clipPath id="footClip"><rect width="{FOOT_W}" height="{FOOT_H}" rx="16" /></clipPath>'''
+
+    body = f'''<g clip-path="url(#footClip)">
+    <rect width="{FOOT_W}" height="{FOOT_H}" fill="{BG}" />
+    <g opacity="0.85">{contour_layers(field, FOOT_W, FOOT_H * 2.2, flip=True, opacity=0.75)}</g>
+    <rect width="{FOOT_W}" height="{FOOT_H}" fill="url(#fscrim)" />
+    <rect width="{FOOT_W}" height="{FOOT_H}" filter="url(#grain)" opacity="0.05" />
+    <g class="tx" style="animation-delay:0.2s">
+      <text x="{FOOT_W / 2}" y="62" fill="{INK}" font-size="20" font-weight="600"
+            text-anchor="middle" font-family="{SANS}">Always mapping new ground.</text>
+      <text x="{FOOT_W / 2}" y="90" fill="{MUTED}" font-size="13.5" text-anchor="middle"
+            font-family="{SANS}">Open to conversations about ML systems, backend architecture, and hard problems.</text>
+      <text x="{FOOT_W / 2}" y="118" fill="{MUTED}" font-size="11.5" text-anchor="middle"
+            font-family="{MONO}">dhruvgupta6580@gmail.com &#183; Ghaziabad, India</text>
+    </g>
+  </g>
+  <rect x="0.75" y="0.75" width="{FOOT_W - 1.5}" height="{FOOT_H - 1.5}" rx="16" fill="none"
+        stroke="#3b3d54" stroke-width="1.5" />'''
+    return doc(FOOT_W, FOOT_H, "footer", body, grads)
 
 
 PROF_W, PROF_H = 1200, 300
@@ -456,37 +610,28 @@ def render_activity(user):
         (pad_l + i / span * plot_w, base_y - (c / peak) * plot_h)
         for i, c in enumerate(weeks)
     ]
-
     d = f"M{pts[0][0]:.1f} {pts[0][1]:.1f}"
     for i in range(len(pts) - 1):
         x0, y0 = pts[i]
         x1, y1 = pts[i + 1]
         mx = (x0 + x1) / 2
         d += f"C{mx:.1f} {y0:.1f},{mx:.1f} {y1:.1f},{x1:.1f} {y1:.1f}"
-    ridge = d
     area = d + f"L{pts[-1][0]:.1f} {base_y:.1f}L{pts[0][0]:.1f} {base_y:.1f}Z"
 
-    # Hypsometric bands clipped to the terrain silhouette.
-    bands = ""
     steps = 9
-    for i in range(steps):
-        t = i / (steps - 1)
-        y0 = base_y - plot_h * (i + 1) / steps
-        bands += (
-            f'<rect x="{pad_l}" y="{y0:.1f}" width="{plot_w}" '
-            f'height="{plot_h / steps + 1:.1f}" fill="{tint(t)}" fill-opacity="0.92" />'
-        )
-
+    bands = "".join(
+        f'<rect x="{pad_l}" y="{base_y - plot_h * (i + 1) / steps:.1f}" width="{plot_w}" '
+        f'height="{plot_h / steps + 1:.1f}" fill="{tint(i / (steps - 1))}" fill-opacity="0.92" />'
+        for i in range(steps)
+    )
     grid = "".join(
         f'<line x1="{pad_l}" y1="{base_y - plot_h * f:.1f}" x2="{PROF_W - pad_r}" '
-        f'y2="{base_y - plot_h * f:.1f}" stroke="{LINE}" stroke-width="1" '
-        f'stroke-dasharray="3 5" />'
+        f'y2="{base_y - plot_h * f:.1f}" stroke="{LINE}" stroke-width="1" stroke-dasharray="3 5" />'
         for f in (0.25, 0.5, 0.75, 1.0)
     )
 
     ticks = ""
-    seen = set()
-    last_x = -999.0
+    seen, last_x = set(), -999.0
     for i, s in enumerate(starts):
         m = s[:7]
         if m in seen:
@@ -496,29 +641,27 @@ def render_activity(user):
         if x - last_x < 46:
             continue
         last_x = x
+        month = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"][int(s[5:7]) - 1]
         ticks += (
             f'<line x1="{x:.1f}" y1="{base_y}" x2="{x:.1f}" y2="{base_y + 6}" '
             f'stroke="{DIM}" stroke-width="1" />'
             f'<text x="{x:.1f}" y="{base_y + 22}" fill="{DIM}" font-size="10.5" '
-            f'font-family="{MONO}" text-anchor="middle">{date.fromisoformat(s).strftime("%b").upper()}</text>'
+            f'font-family="{MONO}" text-anchor="middle">{month}</text>'
         )
 
     hi = weeks.index(peak)
     hx = pad_l + hi / span * plot_w
     hy = base_y - plot_h
     anchor = "end" if hx > PROF_W - 120 else "middle"
-    label_x = hx - 10 if anchor == "end" else hx
     callout = (
         f'<line x1="{hx:.1f}" y1="{hy:.1f}" x2="{hx:.1f}" y2="{hy - 12:.1f}" '
         f'stroke="{CYAN}" stroke-width="1" stroke-opacity="0.7" />'
         f'<circle class="pk" cx="{hx:.1f}" cy="{hy:.1f}" r="3.5" fill="{CYAN}" />'
-        f'<text x="{label_x:.1f}" y="{hy - 18:.1f}" fill="{CYAN}" font-size="11" '
-        f'font-family="{MONO}" text-anchor="{anchor}">peak {peak}</text>'
+        f'<text x="{hx - 10 if anchor == "end" else hx:.1f}" y="{hy - 18:.1f}" fill="{CYAN}" '
+        f'font-size="11" font-family="{MONO}" text-anchor="{anchor}">peak {peak}</text>'
     )
-
     scale = "".join(
-        f'<rect x="{pad_l + i * 22}" y="{PROF_H - 22}" width="22" height="5" '
-        f'fill="{tint(i / 7)}" />'
+        f'<rect x="{pad_l + i * 22}" y="{PROF_H - 22}" width="22" height="5" fill="{tint(i / 7)}" />'
         for i in range(8)
     )
 
@@ -528,7 +671,7 @@ def render_activity(user):
   <g clip-path="url(#terrain)">{bands}
     <rect x="{pad_l}" y="{pad_t}" width="{plot_w}" height="{plot_h}" fill="url(#hatch)" />
   </g>
-  <path d="{ridge}" fill="none" stroke="{INK}" stroke-width="1.6" stroke-opacity="0.85"
+  <path d="{d}" fill="none" stroke="{INK}" stroke-width="1.6" stroke-opacity="0.85"
         stroke-linejoin="round" stroke-linecap="round" />
   <line x1="{pad_l}" y1="{base_y}" x2="{PROF_W - pad_r}" y2="{base_y}" stroke="{DIM}" stroke-width="1.2" />
   {ticks}{callout}{scale}
@@ -538,63 +681,56 @@ def render_activity(user):
     return doc(PROF_W, PROF_H, "weekly contribution elevation profile", body)
 
 
-STRATA_W, STRATA_H = 592, 300
+LANG_W, LANG_H = 592, 300
 
 
 def render_languages(user):
     # Count repositories per language: byte counts let notebooks swamp everything.
-    totals = {}
-    colors = {}
+    totals, colors = {}, {}
     for repo in user["repositories"]["nodes"]:
         for edge in repo["languages"]["edges"]:
             name = edge["node"]["name"]
             totals[name] = totals.get(name, 0) + 1
-            colors[name] = edge["node"]["color"] or "#8b93b0"
+            colors[name] = edge["node"]["color"]
 
     ranked = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)[:6]
-    grand = sum(totals.values()) or 1
-    other = grand - sum(v for _, v in ranked)
+    top = ranked[0][1] if ranked else 1
 
-    rows = ranked + ([("Other", other)] if other > 0 else [])
-    pad_t = 66
-    avail = STRATA_H - pad_t - 26
-    x0, x1 = 26, 250
-
-    raw = [max(avail * (v / grand), 26.0) for _, v in rows]
-    scale = avail / sum(raw)
-    heights = [h * scale for h in raw]
-
-    layers = ""
-    labels = ""
-    y = pad_t
-    for i, (name, size) in enumerate(rows):
-        share = size / grand
-        h = heights[i]
-        col = for_dark(colors.get(name, "#8b93b0"))
-        layers += (
-            f'<rect class="bar" style="animation-delay:{0.08 * i:.2f}s" x="{x0}" y="{y:.1f}" '
-            f'width="{x1 - x0}" height="{h - 3:.1f}" rx="3" fill="{col}" fill-opacity="0.88" />'
-            f'<rect x="{x0}" y="{y:.1f}" width="{x1 - x0}" height="{h - 3:.1f}" rx="3" fill="url(#hatch)" />'
+    x_icon, x_name, x_bar = 26, 60, 172
+    bar_w = 320
+    rows = ""
+    y = 82
+    for i, (name, count) in enumerate(ranked):
+        col = for_dark(colors.get(name))
+        frac = count / top
+        glyph = icon(LANG_ICON.get(name, ""), x_icon, y - 13, 20) if name in LANG_ICON else ""
+        swatch = (
+            ""
+            if glyph
+            else f'<rect x="{x_icon + 4}" y="{y - 9}" width="12" height="12" rx="3" fill="{col}" />'
         )
-        cy = y + (h - 3) / 2
-        labels += (
-            f'<line x1="{x1 + 8}" y1="{cy:.1f}" x2="{x1 + 26}" y2="{cy:.1f}" '
-            f'stroke="{LINE}" stroke-width="1" />'
-            f'<rect x="{x1 + 32}" y="{cy - 4:.1f}" width="8" height="8" rx="2" fill="{col}" />'
-            f'<text x="{x1 + 48}" y="{cy + 4:.1f}" fill="{INK}" font-size="13" '
+        rows += (
+            f'<g class="tx" style="animation-delay:{0.06 * i:.2f}s">'
+            f'{plate(x_icon, y - 13, 20)}{glyph}{swatch}'
+            f'<text x="{x_name}" y="{y + 1}" fill="{INK}" font-size="13.5" '
             f'font-family="{SANS}">{name}</text>'
-            f'<text x="{STRATA_W - 26}" y="{cy + 4:.1f}" fill="{MUTED}" font-size="12.5" '
-            f'font-family="{MONO}" text-anchor="end">{share * 100:.1f}%</text>'
+            f'<rect x="{x_bar}" y="{y - 7}" width="{bar_w}" height="9" rx="4.5" '
+            f'fill="#ffffff" fill-opacity="0.06" />'
+            f'<rect class="bar" style="animation-delay:{0.06 * i:.2f}s" x="{x_bar}" y="{y - 7}" '
+            f'width="{max(bar_w * frac, 8):.1f}" height="9" rx="4.5" fill="{col}" />'
+            f'<text x="{LANG_W - 26}" y="{y + 1}" fill="{MUTED}" font-size="12.5" '
+            f'font-family="{MONO}" text-anchor="end">{count}</text>'
+            f"</g>"
         )
-        y += h
+        y += 36
 
-    body = f'''{frame(STRATA_W, STRATA_H, "STRATA &#183; LANGUAGE COMPOSITION", f"{user['repositories']['totalCount']} repos")}
-  {layers}{labels}
-  {outline(STRATA_W, STRATA_H)}'''
-    return doc(STRATA_W, STRATA_H, "language composition strata", body)
+    body = f'''{frame(LANG_W, LANG_H, "LANGUAGE INDEX &#183; BY REPOSITORY", f"{user['repositories']['totalCount']} repos")}
+  {rows}
+  {outline(LANG_W, LANG_H)}'''
+    return doc(LANG_W, LANG_H, "language index", body)
 
 
-SURVEY_W, SURVEY_H = 592, 300
+STAT_W, STAT_H = 592, 300
 
 
 def render_stats(user):
@@ -603,109 +739,106 @@ def render_stats(user):
     contrib = user["contributionsCollection"]
     stars = sum(r["stargazerCount"] for r in user["repositories"]["nodes"])
 
-    cells = [
-        ("COMMITS", f"{contrib['totalCommitContributions']:,}", PINK),
-        ("PULL REQUESTS", f"{contrib['totalPullRequestContributions']:,}", PURPLE),
-        ("ISSUES", f"{contrib['totalIssueContributions']:,}", CYAN),
+    commits = contrib["totalCommitContributions"]
+    prs = contrib["totalPullRequestContributions"]
+    issues = contrib["totalIssueContributions"]
+    mix = [("Commits", commits, PINK), ("Pull requests", prs, PURPLE), ("Issues", issues, CYAN)]
+    total = max(commits + prs + issues, 1)
+
+    cx, cy, r = 132, 178, 62
+    circ = 2 * math.pi * r
+    arcs = ""
+    acc = 0.0
+    for i, (_, value, color) in enumerate(mix):
+        frac = value / total
+        if frac <= 0:
+            continue
+        arcs += (
+            f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{color}" '
+            f'stroke-width="19" pathLength="1" '
+            f'stroke-dasharray="{frac:.5f} {1 - frac:.5f}" '
+            f'stroke-dashoffset="{-acc:.5f}" '
+            f'transform="rotate(-90 {cx} {cy})" />'
+        )
+        acc += frac
+
+    donut = (
+        f'<g class="tx" style="animation-delay:0.15s">'
+        f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="#ffffff" '
+        f'stroke-opacity="0.06" stroke-width="19" />{arcs}'
+        f'</g>'
+        f'<g class="tx" style="animation-delay:0.35s">'
+        f'<text x="{cx}" y="{cy - 2}" fill="{INK}" font-size="27" font-weight="700" '
+        f'text-anchor="middle" font-family="{SANS}">{total:,}</text>'
+        f'<text x="{cx}" y="{cy + 17}" fill="{DIM}" font-size="10" text-anchor="middle" '
+        f'font-family="{MONO}" letter-spacing="1.2">CONTRIBUTIONS</text></g>'
+    )
+
+    legend = ""
+    ly = 80
+    for i, (label, value, color) in enumerate(mix):
+        legend += (
+            f'<g class="tx" style="animation-delay:{0.08 * i:.2f}s">'
+            f'<rect x="238" y="{ly - 9}" width="10" height="10" rx="3" fill="{color}" />'
+            f'<text x="256" y="{ly}" fill="{MUTED}" font-size="12.5" font-family="{SANS}">{label}</text>'
+            f'<text x="{STAT_W - 26}" y="{ly}" fill="{INK}" font-size="13" font-weight="600" '
+            f'font-family="{MONO}" text-anchor="end">{value:,}</text></g>'
+        )
+        ly += 26
+
+    figures = [
         ("CURRENT STREAK", f"{current}d", GREEN),
         ("LONGEST STREAK", f"{longest}d", PINK),
         ("STARS EARNED", f"{stars:,}", PURPLE),
-        ("REPOSITORIES", f"{user['repositories']['totalCount']}", CYAN),
-        ("FOLLOWERS", f"{user['followers']['totalCount']}", GREEN),
+        ("FOLLOWERS", f"{user['followers']['totalCount']}", CYAN),
     ]
-
-    pad = 26
-    cols, rows_n = 2, 4
-    cw = (SURVEY_W - pad * 2) / cols
-    ch = (SURVEY_H - 66 - pad) / rows_n
-
-    out = ""
-    inset = max((ch - 40) / 2, 0)
-    for i, (label, value, accent) in enumerate(cells):
-        cx = pad + (i % cols) * cw
-        cy = 66 + inset + (i // cols) * ch
-        out += (
-            f'<g class="tx" style="animation-delay:{0.05 * i:.2f}s">'
-            f'<line x1="{cx:.1f}" y1="{cy + 6:.1f}" x2="{cx:.1f}" y2="{cy + 30:.1f}" '
-            f'stroke="{accent}" stroke-width="2" />'
-            f'<text x="{cx + 12:.1f}" y="{cy + 20:.1f}" fill="{INK}" font-size="23" '
-            f'font-weight="700" font-family="{SANS}">{value}</text>'
-            f'<text x="{cx + 12:.1f}" y="{cy + 39:.1f}" fill="{DIM}" font-size="10" '
-            f'font-family="{MONO}" letter-spacing="1.2">{label}</text>'
-            f"</g>"
+    tiles = f'<line x1="238" y1="168" x2="{STAT_W - 26}" y2="168" stroke="{LINE}" stroke-width="1" />'
+    for i, (label, value, color) in enumerate(figures):
+        tx = 238 + (i % 2) * 168
+        ty = 200 + (i // 2) * 54
+        tiles += (
+            f'<g class="tx" style="animation-delay:{0.3 + 0.06 * i:.2f}s">'
+            f'<line x1="{tx}" y1="{ty - 14}" x2="{tx}" y2="{ty + 8}" stroke="{color}" stroke-width="2" />'
+            f'<text x="{tx + 11}" y="{ty}" fill="{INK}" font-size="20" font-weight="700" '
+            f'font-family="{SANS}">{value}</text>'
+            f'<text x="{tx + 11}" y="{ty + 18}" fill="{DIM}" font-size="9.5" '
+            f'font-family="{MONO}" letter-spacing="1.1">{label}</text></g>'
         )
 
-    body = f'''{frame(SURVEY_W, SURVEY_H, "SURVEY MARKERS &#183; 12 MONTHS", "@" + USERNAME)}
-  {out}
-  {outline(SURVEY_W, SURVEY_H)}'''
-    return doc(SURVEY_W, SURVEY_H, "profile statistics", body)
+    body = f'''{frame(STAT_W, STAT_H, "CONTRIBUTION MIX &#183; 12 MONTHS", "@" + USERNAME)}
+  {donut}{legend}{tiles}
+  {outline(STAT_W, STAT_H)}'''
+    return doc(STAT_W, STAT_H, "contribution mix", body)
 
 
 STACK_W = 1200
 
-STACK = [
-    (
-        "LANGUAGES &#38; ML",
-        [
-            ("Python", "#3776AB"),
-            ("JavaScript", "#F7DF1E"),
-            ("TypeScript", "#3178C6"),
-            ("Go", "#00ADD8"),
-            ("NumPy", "#013243"),
-            ("Pandas", "#150458"),
-            ("TensorFlow", "#FF6F00"),
-            ("PyTorch", "#EE4C2C"),
-            ("Jupyter", "#F37626"),
-        ],
-    ),
-    (
-        "WEB &#38; DATA",
-        [
-            ("React", "#61DAFB"),
-            ("FastAPI", "#009688"),
-            ("Tailwind", "#06B6D4"),
-            ("PostgreSQL", "#4169E1"),
-            ("MySQL", "#4479A1"),
-            ("Redis", "#DC382D"),
-            ("Firebase", "#FFCA28"),
-            ("Supabase", "#3ECF8E"),
-        ],
-    ),
-    (
-        "TOOLS &#38; CLOUD",
-        [
-            ("Git", "#F05032"),
-            ("Docker", "#2496ED"),
-            ("Azure", "#0078D4"),
-            ("Linux", "#FCC624"),
-            ("GitLab", "#FC6D26"),
-            ("npm", "#CB3837"),
-        ],
-    ),
-]
-
 
 def render_stack():
     col_w = (STACK_W - 52) / 3
-    row_h = 26
+    row_h = 30
     tallest = max(len(items) for _, items in STACK)
-    height = 66 + tallest * row_h + 24
+    height = 74 + tallest * row_h + 22
 
     out = ""
     for ci, (heading, items) in enumerate(STACK):
         x = 26 + ci * col_w
         out += (
-            f'<text x="{x:.1f}" y="70" fill="{MUTED}" font-size="10.5" '
+            f'<text x="{x:.1f}" y="72" fill="{MUTED}" font-size="10.5" '
             f'font-family="{MONO}" letter-spacing="1.8">{heading}</text>'
         )
-        for ri, (name, color) in enumerate(items):
-            y = 70 + 24 + ri * row_h
-            col = for_dark(color)
+        for ri, (name, slug, color) in enumerate(items):
+            y = 72 + 26 + ri * row_h
+            glyph = icon(slug, x, y - 14, 19)
+            swatch = (
+                ""
+                if glyph
+                else f'<rect x="{x + 4}" y="{y - 10}" width="11" height="11" rx="3" fill="{for_dark(color)}" />'
+            )
             out += (
-                f'<g class="tx" style="animation-delay:{0.03 * (ci * 4 + ri):.2f}s">'
-                f'<rect x="{x:.1f}" y="{y - 9:.1f}" width="10" height="10" rx="2.5" fill="{col}" />'
-                f'<rect x="{x:.1f}" y="{y - 9:.1f}" width="10" height="10" rx="2.5" fill="url(#hatch)" />'
-                f'<text x="{x + 20:.1f}" y="{y:.1f}" fill="{INK}" font-size="13.5" '
+                f'<g class="tx" style="animation-delay:{0.025 * (ci * 3 + ri):.2f}s">'
+                f'{plate(x, y - 14, 19, 5)}{glyph}{swatch}'
+                f'<text x="{x + 30:.1f}" y="{y:.1f}" fill="{INK}" font-size="13.5" '
                 f'font-family="{SANS}">{name}</text></g>'
             )
 
@@ -717,13 +850,17 @@ def render_stack():
 
 def main():
     user = fetch()
+    weeks, _, _ = weekly(user)
+    field = build_field(weeks)
+
     os.makedirs(OUT_DIR, exist_ok=True)
     cards = {
-        "header.svg": render_header(user),
-        "activity.svg": render_activity(user),
+        "header.svg": render_header(user, field),
+        "stack.svg": render_stack(),
         "languages.svg": render_languages(user),
         "stats.svg": render_stats(user),
-        "stack.svg": render_stack(),
+        "activity.svg": render_activity(user),
+        "footer.svg": render_footer(field),
     }
     for name, svg in cards.items():
         with open(os.path.join(OUT_DIR, name), "w", encoding="utf-8") as f:

@@ -1,10 +1,11 @@
 <div align="center">
-  <img src="assets/header.svg" width="100%" alt="Dhruv Gupta — Machine Learning and Full-Stack Engineering" />
+  <img src="assets/header.svg" width="100%" alt="Dhruv Gupta — Software Engineer at Deloitte" />
 </div>
 
 <p align="center">
-  Building production-ready web and AI/ML systems. Ex-ONGC intern, top 50 of 2000+ at SAP India Hackfest.<br/>
-  Studying CSE (IoT &amp; Intelligent Systems) at Manipal University Jaipur.
+  <b>Software Engineer at Deloitte</b>, shipping production systems where machine learning meets real infrastructure.<br/>
+  B.Tech in CSE (IoT &amp; Intelligent Systems), Manipal University Jaipur. Previously ONGC.<br/>
+  <sub>Top 50 of 2000+ at SAP India Hackfest &#183; I like problems that look impossible until the third attempt.</sub>
 </p>
 
 <div align="center">
@@ -28,12 +29,18 @@
 <br/>
 
 <div align="center">
-  <img src="assets/languages.svg" width="49%" alt="Language composition" />
-  <img src="assets/stats.svg" width="49%" alt="Profile statistics" />
+  <img src="assets/languages.svg" width="49%" alt="Language index" />
+  <img src="assets/stats.svg" width="49%" alt="Contribution mix" />
 </div>
 
 <br/>
 
 <div align="center">
   <img src="assets/activity.svg" width="100%" alt="Weekly contribution elevation profile" />
+</div>
+
+<br/>
+
+<div align="center">
+  <img src="assets/footer.svg" width="100%" alt="Open to collaborating" />
 </div>
