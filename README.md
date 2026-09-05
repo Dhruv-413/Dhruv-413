@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:282A36,100:BD93F9&height=140&section=header&text=Dhruv%20Gupta&fontSize=42&fontColor=F8F8F2&animation=fadeIn&fontAlignY=40" width="100%" alt="header banner" />
+</div>
+
 ## 📝 Summary
 
 Hi, I'm Dhruv Gupta, a software engineer and machine learning enthusiast. I enjoy working in the domain of machine learning and data science, where I can blend analytical thinking with creativity. I'm currently pursuing my B.Tech in Computer Science and Engineering (IoT & Intelligent Systems) at Manipal University Jaipur.I'm always excited to learn, collaborate, and contribute to meaningful tech projects.
@@ -65,16 +69,16 @@ Thanks for visiting my GitHub, looking forward to connecting and building someth
 ###
 
 <div align="center">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs?username=Dhruv-413&locale=en&hide_title=false&layout=compact&card_width=320&langs_count=5&theme=dracula&hide_border=false&order=2" height="150" alt="languages graph"  />
-  <img src="https://streak-stats.demolab.com?user=Dhruv-413&locale=en&mode=daily&theme=dracula&hide_border=false&border_radius=3&order=3" height="150" alt="streak graph"  />
+  <img src="assets/languages.svg" height="180" alt="languages graph"  />
+  <img src="https://streak-stats.demolab.com?user=Dhruv-413&locale=en&mode=daily&theme=dracula&hide_border=true&border_radius=10&background=282A36&ring=BD93F9&fire=FF79C6&currStreakLabel=F8F8F2" height="180" alt="streak graph"  />
 </div>
 
 <div align="center">
-  <img src="https://github-profile-trophy.vercel.app?username=Dhruv-413&theme=dracula&column=-1&row=1&margin-w=8&margin-h=8&no-bg=true&no-frame=false&order=4" height="150" alt="trophy graph"  />
+  <img src="assets/trophy.svg" height="150" alt="trophy graph"  />
 </div>
 
 <div align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=Dhruv-413&radius=16&theme=dracula&area=true&order=5" height="300" alt="activity-graph graph"  />
+  <img src="assets/snake.svg" width="100%" alt="live contribution snake"  />
 </div>
 
 ###

@@ -1,0 +1,57 @@
+name: Refresh profile graphics
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PROFILE_PAT }}
+
+      - name: Generate language chart
+        uses: cicirello/user-statistician@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
+        with:
+          image-file: assets/languages.svg
+          category-order: languages
+          include-title: false
+          colors: "#282a36 #bd93f9 #ff79c6 #f8f8f2 #f8f8f2"
+          border-radius: 10
+          show-border: true
+          animated-language-chart: true
+          max-languages: 6
+          commit-and-push: false
+
+      - name: Generate trophy graph
+        uses: ryo-ma/github-profile-trophy@e3c89df995e92e67cdd4b2acaab9d974583dc1f7 # master, includes theme input (post-v1.0)
+        with:
+          username: Dhruv-413
+          output_path: assets/trophy.svg
+          token: ${{ secrets.PROFILE_PAT }}
+          theme: dracula
+
+      - name: Generate contribution snake
+        uses: Platane/snk@v3
+        with:
+          github_user_name: Dhruv-413
+          github_token: ${{ secrets.PROFILE_PAT }}
+          outputs: |
+            assets/snake.svg?color_snake=%2350fa7b&color_dots=%23282a36,%2344475a,%236272a4,%23bd93f9,%23ff79c6
+
+      - name: Commit generated graphics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/languages.svg assets/trophy.svg assets/snake.svg
+          git diff --cached --quiet || git commit -m "chore: refresh profile graphics"
+          git push
