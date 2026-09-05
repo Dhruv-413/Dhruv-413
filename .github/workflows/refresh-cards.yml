@@ -17,48 +17,18 @@ jobs:
         with:
           token: ${{ secrets.PROFILE_PAT }}
 
-      - name: Generate language card
-        uses: vn7n24fzkq/github-profile-summary-cards@d9632798b299e9ad6940449a859c30742eb5b549 # v0.12.0
-        with:
-          USERNAME: Dhruv-413
-          THEME: dracula
-          ANIMATION: fade
-          AUTO_PUSH: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
-
-      - name: Move language card into assets
-        run: |
-          mv profile-summary-card-output/dracula/1-repos-per-language.svg assets/languages.svg
-          rm -rf profile-summary-card-output
-
-      - name: Generate trophy graph
-        uses: ryo-ma/github-profile-trophy@e3c89df995e92e67cdd4b2acaab9d974583dc1f7 # master, includes theme input (post-v1.0)
-        with:
-          username: Dhruv-413
-          output_path: assets/trophy.svg
-          token: ${{ secrets.PROFILE_PAT }}
-          theme: dracula
-
-      - name: Generate activity chart
-        run: python3 scripts/render_activity.py
+      - name: Render cards
+        run: python3 scripts/render_cards.py
         env:
           GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
           GITHUB_USER: Dhruv-413
-          OUT_PATH: assets/activity.svg
-
-      - name: Generate header terrain
-        run: python3 scripts/render_header.py
-        env:
-          GITHUB_TOKEN: ${{ secrets.PROFILE_PAT }}
-          GITHUB_USER: Dhruv-413
-          OUT_PATH: assets/header.svg
+          OUT_DIR: assets
 
       - name: Commit generated graphics
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git rm --ignore-unmatch -q assets/snake.svg
-          git add assets/languages.svg assets/trophy.svg assets/activity.svg assets/header.svg
+          git add assets/header.svg assets/activity.svg assets/languages.svg \
+                  assets/stats.svg assets/stack.svg
           git diff --cached --quiet || git commit -m "chore: refresh profile graphics"
           git push
